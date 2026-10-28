@@ -21,7 +21,7 @@ import java.util.List;
  * Dịch vụ bảo vệ (trợ năng). Làm 3 việc:
  * 1) Khi một cửa sổ ứng dụng lạ hiện ra (Cài đặt, Live TV, Play Store, màn hình chính gốc...) thì bấm Home để về màn hình trẻ em.
  * 2) Khi đang khóa (hết giờ) mà YouTube hay bất kỳ ứng dụng nào lên trước thì đưa về màn hình khóa.
- * 3) Theo dõi màn hình TV bật/tắt để tạm dừng/đếm tiếp giờ xem.
+ * 3) Theo dõi màn hình TV bật/tắt: tắt thì khóa chờ toán cho lần bật sau (hoặc tạm dừng giờ nếu tắt tính năng toán khi bật TV).
  * Không đọc nội dung màn hình (canRetrieveWindowContent = false).
  */
 public class GuardService extends AccessibilityService {
@@ -61,13 +61,15 @@ public class GuardService extends AccessibilityService {
             public void onReceive(Context c, Intent i) {
                 String a = i.getAction();
                 if (Intent.ACTION_SCREEN_ON.equals(a)) {
-                    onScreen(true);
+                    onScreen(true, true);
                 } else if (Intent.ACTION_SCREEN_OFF.equals(a)) {
-                    onScreen(false);
+                    onScreen(false, true);
                 } else if (Intent.ACTION_DREAMING_STARTED.equals(a)) {
                     dreaming = true;
+                    Dbg.event(GuardService.this, "screensaver bat");
                 } else if (Intent.ACTION_DREAMING_STOPPED.equals(a)) {
                     dreaming = false;
+                    Dbg.event(GuardService.this, "screensaver tat");
                 }
             }
         };
@@ -78,7 +80,7 @@ public class GuardService extends AccessibilityService {
         f.addAction(Intent.ACTION_DREAMING_STOPPED);
         registerReceiver(receiver, f);
         wasParent = Prefs.parentActive(this);
-        onScreen(isInteractive());
+        onScreen(isInteractive(), false);
         handler.removeCallbacks(tick);
         handler.postDelayed(tick, TICK_MS);
     }
@@ -154,13 +156,21 @@ public class GuardService extends AccessibilityService {
         }
     }
 
-    private void onScreen(boolean on) {
-        Dbg.d("man hinh " + (on ? "bat" : "tat"));
+    /** fromEvent = false: gọi lúc dịch vụ vừa kết nối (đọc trạng thái hiện tại), không phải TV vừa tắt/bật thật. */
+    private void onScreen(boolean on, boolean fromEvent) {
+        Dbg.event(this, "man hinh " + (on ? "bat" : "tat") + (fromEvent ? "" : " (luc ket noi dich vu)")
+                + " state=" + Session.state(this) + " gate=" + Prefs.gate(this));
         if (on) {
             Session.resume(this);
-            if (Session.checkExpired(this) && !Prefs.parentActive(this)) {
-                Home.bringToFront(this, "het gio khi bat man hinh");
+            boolean expired = Session.checkExpired(this);
+            boolean locked = Session.state(this) == Session.LOCKED;
+            // TV vừa bật mà đang khóa (hết giờ, hoặc chờ giải toán): kéo màn hình khóa lên ngay, đừng để YouTube lộ ra.
+            if (!Prefs.parentActive(this) && (expired || (fromEvent && locked))) {
+                Home.bringToFront(this, expired ? "het gio khi bat man hinh" : "khoa khi bat man hinh");
             }
+        } else if (Session.powerCycle(this, "tat man hinh")) {
+            wasParent = false;
+            Kids.kill(this);
         } else {
             Session.pause(this);
         }

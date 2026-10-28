@@ -8,8 +8,11 @@ import android.content.Intent;
  * Cổng điều khiển bằng adb (receiver chỉ nhận từ tài khoản có quyền DUMP, tức adb shell):
  *   am broadcast -n com.minhminhhungyen.kidstv/.AdminReceiver -a com.minhminhhungyen.kidstv.STATUS
  * Lệnh: STATUS, GRANT (--ei minutes N | --ei seconds N), EXPIRE, RESET_DAY (về trạng thái đầu ngày mới), RESET_PWD,
- *       PARENT_ON (--ei minutes N), PARENT_OFF, CONFIG (--ei session N --ei bonus N --ei streak N --ei cap N --ei free 0|1),
- *       SHUTDOWN (gỡ dịch vụ bảo vệ).
+ *       PARENT_ON (--ei minutes N), PARENT_OFF,
+ *       CONFIG (--ei session N --ei bonus N --ei streak N --ei cap N --ei free 0|1 --ei gate N --ei freeDay N;
+ *               gate 0 = tắt toán khi bật TV; freeDay 0 = coi như hôm nay chưa dùng phiên miễn phí),
+ *       POWERCYCLE (giả lập "TV vừa tắt"), BOOT (giả lập "TV vừa khởi động xong"; adb không gửi được BOOT_COMPLETED thật),
+ *       EVENTS (các sự kiện tắt/bật gần nhất, còn nguyên sau khi TV khởi động lại), SHUTDOWN (gỡ dịch vụ bảo vệ).
  */
 public class AdminReceiver extends BroadcastReceiver {
     static final String P = "com.minhminhhungyen.kidstv.";
@@ -75,7 +78,24 @@ public class AdminReceiver extends BroadcastReceiver {
                 if (i.hasExtra("free")) {
                     Prefs.setFreeDaily(c, i.getIntExtra("free", 1) != 0);
                 }
+                if (i.hasExtra("gate")) {
+                    Prefs.setGateCount(c, i.getIntExtra("gate", 10));
+                }
+                if (i.hasExtra("freeDay")) {
+                    // Để thử: 0 = hôm nay bé chưa dùng phiên miễn phí (không đụng tới phiên đang chạy).
+                    Prefs.setFreeDay(c, i.getIntExtra("freeDay", 0));
+                }
                 out = "config ok";
+                break;
+            case "POWERCYCLE":
+                out = Session.powerCycle(c, "adb") ? "gate started" : "gate is off (gateCount=0), nothing done";
+                break;
+            case "BOOT":
+                new BootReceiver().onReceive(c, new Intent(Intent.ACTION_BOOT_COMPLETED));
+                out = "boot simulated";
+                break;
+            case "EVENTS":
+                out = Dbg.events(c, 60);
                 break;
             case "SHUTDOWN":
                 GuardEnabler.disable(c);
@@ -102,7 +122,9 @@ public class AdminReceiver extends BroadcastReceiver {
         sb.append(" remaining=").append(Session.remainingMs(c) / 1000).append("s");
         sb.append(" parent=").append(Prefs.parentActive(c));
         sb.append(" passThrough=").append(Prefs.passThrough(c));
-        sb.append(" streak=").append(Prefs.streak(c)).append('/').append(Prefs.streakGoal(c));
+        boolean gateMode = Prefs.gate(c) && Prefs.gateCount(c) > 0;
+        sb.append(" streak=").append(Prefs.streak(c)).append('/').append(gateMode ? Prefs.gateCount(c) : Prefs.streakGoal(c));
+        sb.append(" gate=").append(Prefs.gate(c)).append(" gateCount=").append(Prefs.gateCount(c));
         sb.append(" session=").append(Prefs.sessionMin(c)).append("m bonus=").append(Prefs.bonusMin(c)).append('m');
         sb.append(" bonusToday=").append(Prefs.bonusToday(c)).append("/cap").append(Prefs.bonusCap(c));
         sb.append(" freeDaily=").append(Prefs.freeDaily(c)).append(" freeDay=").append(Prefs.freeDay(c));

@@ -54,6 +54,7 @@ public class MainActivity extends Activity {
     private static final int[] BONUS_OPTS = {5, 10, 15, 20, 30};
     private static final int[] STREAK_OPTS = {5, 10, 15, 20, 30};
     private static final int[] CAP_OPTS = {0, 1, 2, 3, 5};
+    private static final int[] GATE_OPTS = {0, 5, 10, 15, 20};
     private static final String[] DAYS = {"Chủ nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"};
 
     private final Handler ui = new Handler(Looper.getMainLooper());
@@ -308,15 +309,34 @@ public class MainActivity extends Activity {
         tile.requestFocus();
     }
 
+    /** Đang khóa vì TV vừa tắt/bật (chờ giải toán để bắt đầu một phiên mới), không phải vì hết giờ. */
+    private boolean gateMode() {
+        return Prefs.gate(this) && Prefs.gateCount(this) > 0;
+    }
+
+    /** Số câu đúng liên tiếp cần đạt ở màn hình khóa hiện tại. */
+    private int goal() {
+        return gateMode() ? Prefs.gateCount(this) : Math.max(1, Prefs.streakGoal(this));
+    }
+
     private void showLock() {
         boolean wasLock = screen == S_LOCK;
         show(S_LOCK);
-        boolean capped = Prefs.bonusCap(this) > 0 && Prefs.bonusToday(this) >= Prefs.bonusCap(this);
-        int goal = Prefs.streakGoal(this);
+        final boolean gate = gateMode();
+        // Lượt thưởng mỗi ngày chỉ áp dụng cho khóa hết giờ; toán khi bật TV không bị giới hạn bởi nó.
+        boolean capped = !gate && Prefs.bonusCap(this) > 0 && Prefs.bonusToday(this) >= Prefs.bonusCap(this);
+        int goal = goal();
         int bonus = Prefs.bonusMin(this);
-        tvLockTitle.setText("Hết giờ xem rồi!");
+        tvLockTitle.setText(gate ? "Chào bé! Làm toán rồi mới xem nhé!" : "Hết giờ xem rồi!");
         btnParentLock.setText(parentLabel());
-        if (capped) {
+        if (gate) {
+            tvLockSub.setText("Giải toán đúng liên tiếp " + goal + " câu để được xem " + Prefs.sessionMin(this) + " phút");
+            mathBox.setVisibility(View.VISIBLE);
+            if (problem == null) {
+                newProblem();
+            }
+            updateProgress();
+        } else if (capped) {
             tvLockSub.setText("Hôm nay bé đã hết lượt thưởng rồi. Hẹn bé ngày mai nhé!");
             mathBox.setVisibility(View.GONE);
         } else {
@@ -698,7 +718,7 @@ public class MainActivity extends Activity {
         }
         answering = true;
         boolean ok = idx == problem.correctIndex;
-        int goal = Prefs.streakGoal(this);
+        int goal = goal();
         if (ok) {
             int s = Prefs.streak(this) + 1;
             Prefs.setStreak(this, s);
@@ -727,14 +747,18 @@ public class MainActivity extends Activity {
     }
 
     private void reward() {
-        final int bonus = Prefs.bonusMin(this);
-        feedback("Tuyệt vời! Bé được xem thêm " + bonus + " phút!", Ui.OK);
+        // Toán khi bật TV: một phiên mới đầy đủ (không tính là lượt thưởng). Toán khi hết giờ: thưởng thêm.
+        final boolean gate = gateMode();
+        final int minutes = gate ? Prefs.sessionMin(this) : Prefs.bonusMin(this);
+        feedback(gate ? "Tuyệt vời! Bé được xem " + minutes + " phút!" : "Tuyệt vời! Bé được xem thêm " + minutes + " phút!", Ui.OK);
         ui.postDelayed(() -> {
             if (Session.state(MainActivity.this) != Session.LOCKED) {
                 return;
             }
-            Prefs.addBonusToday(MainActivity.this);
-            Session.grantMinutes(MainActivity.this, bonus, "giai toan");
+            if (!gate) {
+                Prefs.addBonusToday(MainActivity.this);
+            }
+            Session.grantMinutes(MainActivity.this, minutes, gate ? "giai toan khi bat TV" : "giai toan");
             problem = null;
             screen = -1;
             showHome();
@@ -748,7 +772,7 @@ public class MainActivity extends Activity {
     }
 
     private void updateProgress() {
-        int goal = Math.max(1, Prefs.streakGoal(this));
+        int goal = goal();
         int s = Math.min(goal, Prefs.streak(this));
         tvProgress.setText("Đúng liên tiếp: " + s + " / " + goal);
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) barFill.getLayoutParams();
@@ -954,7 +978,7 @@ public class MainActivity extends Activity {
             Prefs.setBonusMin(c, next(Prefs.bonusMin(c), BONUS_OPTS));
             buildParentRows(2);
         });
-        addRow("Số câu đúng liên tiếp", Prefs.streakGoal(c) + " câu", () -> {
+        addRow("Số câu toán khi hết giờ", Prefs.streakGoal(c) + " câu", () -> {
             Prefs.setStreakGoal(c, next(Prefs.streakGoal(c), STREAK_OPTS));
             buildParentRows(3);
         });
@@ -967,14 +991,17 @@ public class MainActivity extends Activity {
             Prefs.setFreeDaily(c, !Prefs.freeDaily(c));
             buildParentRows(5);
         });
+        int gc = Prefs.gateCount(c);
+        addRow("Số câu toán mỗi lần bật TV", gc == 0 ? "Tắt" : gc + " câu", () -> {
+            Prefs.setGateCount(c, next(Prefs.gateCount(c), GATE_OPTS));
+            buildParentRows(6);
+        });
         addRow("Mật khẩu phụ huynh", PasswordPolicy.hasCustom(c) ? "Cố định" : "Theo ngày (ddMMyyyy)", () -> showPwd(M_NEW));
-        int idx = 7;
         if (PasswordPolicy.hasCustom(c)) {
             addRow("Dùng lại mật khẩu theo ngày", "", () -> {
                 PasswordPolicy.clearCustom(c);
-                buildParentRows(6);
+                buildParentRows(7);
             });
-            idx++;
         }
         addRow("Mở Cài đặt TV", "30 phút", () -> {
             Prefs.setParentUntil(c, System.currentTimeMillis() + 30 * 60_000L);

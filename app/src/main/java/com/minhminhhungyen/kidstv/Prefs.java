@@ -16,6 +16,8 @@ final class Prefs {
     static final String K_STATE = "st";
     static final String K_END = "end";
     static final String K_LEFT = "left";
+    /** true: đang khóa vì TV vừa tắt/bật, chờ bé giải toán (khác với khóa do hết giờ). */
+    static final String K_GATE = "gate";
 
     static SharedPreferences sp(Context c) {
         return c.getApplicationContext().getSharedPreferences(FILE, Context.MODE_PRIVATE);
@@ -53,6 +55,23 @@ final class Prefs {
 
     static void setBonusCap(Context c, int v) {
         sp(c).edit().putInt("bonusCap", v).commit();
+    }
+
+    /**
+     * Số câu toán đúng liên tiếp bé phải giải mỗi lần bật TV (từ lần bật thứ 2 trong ngày) rồi mới được xem một phiên mới.
+     * 0 = tắt tính năng (tắt màn hình chỉ tạm dừng giờ, bật lại thì đếm tiếp).
+     */
+    static int gateCount(Context c) {
+        return sp(c).getInt("gateCount", 10);
+    }
+
+    static void setGateCount(Context c, int v) {
+        sp(c).edit().putInt("gateCount", Math.max(0, v)).commit();
+    }
+
+    /** Đang chờ bé giải toán sau khi bật TV. */
+    static boolean gate(Context c) {
+        return sp(c).getBoolean(K_GATE, false);
     }
 
     /** Mỗi ngày bé được xem phiên đầu tiên mà không cần mật khẩu hay làm toán. */

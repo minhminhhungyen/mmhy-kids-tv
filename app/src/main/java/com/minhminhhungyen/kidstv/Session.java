@@ -9,6 +9,10 @@ import android.content.Intent;
  * Phiên xem TV của bé: KHÓA (LOCKED) → ĐANG XEM (RUNNING) → TẠM DỪNG khi TV tắt màn hình (PAUSED).
  * Hết giờ thì khóa; mở lại bằng mật khẩu phụ huynh hoặc làm toán.
  * Hạn dùng lưu theo giờ đồng hồ (end) nên sống sót qua khởi động lại; báo thức AlarmManager đặt lại khi bật máy.
+ *
+ * Chế độ "toán mỗi lần bật TV" (Prefs.gateCount > 0): TV tắt màn hình hoặc khởi động lại thì KHÔNG tạm dừng mà
+ * khóa luôn (LOCKED + gate = true), bỏ hẳn giờ còn dư. Lần bật sau, bé giải đủ gateCount câu toán thì được một phiên
+ * mới đầy đủ. Riêng lần bật đầu tiên trong ngày vẫn là phiên miễn phí (MainActivity.route cấp, không hỏi toán).
  */
 final class Session {
     private Session() {
@@ -65,9 +69,10 @@ final class Session {
                     .putInt("freeDay", Prefs.dayKey(now))
                     .putInt("grantDay", Prefs.dayKey(now))
                     .putInt("streak", 0)
+                    .putBoolean(Prefs.K_GATE, false)
                     .commit();
             arm(c, now + ms);
-            Dbg.d("grant " + (ms / 1000) + "s (" + why + ")");
+            Dbg.event(c, "grant " + (ms / 1000) + "s (" + why + ")");
         }
     }
 
@@ -77,10 +82,44 @@ final class Session {
                     .putInt(Prefs.K_STATE, LOCKED)
                     .putLong(Prefs.K_END, 0L)
                     .putLong(Prefs.K_LEFT, 0L)
+                    .putBoolean(Prefs.K_GATE, false)
                     .commit();
             cancel(c);
-            Dbg.d("expire (" + why + ")");
+            Dbg.event(c, "expire (" + why + ")");
         }
+    }
+
+    /**
+     * TV vừa tắt (màn hình tắt) hoặc vừa khởi động: khóa và chờ bé giải toán, bỏ giờ còn dư.
+     * Không động tới freeDay: nếu hôm nay bé chưa dùng phiên miễn phí thì lần bật này vẫn được xem miễn phí.
+     */
+    static void startGate(Context c, String why) {
+        synchronized (LOCK) {
+            Prefs.sp(c).edit()
+                    .putInt(Prefs.K_STATE, LOCKED)
+                    .putLong(Prefs.K_END, 0L)
+                    .putLong(Prefs.K_LEFT, 0L)
+                    .putBoolean(Prefs.K_GATE, true)
+                    .putInt("streak", 0)
+                    .commit();
+            cancel(c);
+            Dbg.event(c, "gate (" + why + ")");
+        }
+    }
+
+    /**
+     * Gọi khi TV tắt màn hình hoặc khởi động. Nếu đang bật "toán mỗi lần bật TV" thì kết thúc chế độ phụ huynh
+     * (nếu không, bé bật TV lên là xem tự do cho tới khi hết hạn) rồi khóa chờ toán, trả về true.
+     * Trả về false khi tính năng tắt: người gọi dùng cách cũ (tạm dừng / đếm tiếp).
+     */
+    static boolean powerCycle(Context c, String why) {
+        if (Prefs.gateCount(c) <= 0) {
+            return false;
+        }
+        Prefs.setParentUntil(c, 0L);
+        Prefs.setPassThrough(c, false);
+        startGate(c, why);
+        return true;
     }
 
     /** TV tắt màn hình: dừng đếm giờ, nhớ phần còn lại. */
@@ -92,7 +131,7 @@ final class Session {
             long left = Math.max(0L, Prefs.sp(c).getLong(Prefs.K_END, 0L) - System.currentTimeMillis());
             Prefs.sp(c).edit().putInt(Prefs.K_STATE, PAUSED).putLong(Prefs.K_LEFT, left).commit();
             cancel(c);
-            Dbg.d("pause, left " + (left / 1000) + "s");
+            Dbg.event(c, "pause, left " + (left / 1000) + "s");
         }
     }
 
@@ -111,7 +150,7 @@ final class Session {
             long end = System.currentTimeMillis() + left;
             Prefs.sp(c).edit().putInt(Prefs.K_STATE, RUNNING).putLong(Prefs.K_END, end).putLong(Prefs.K_LEFT, 0L).commit();
             arm(c, end);
-            Dbg.d("resume, left " + (left / 1000) + "s");
+            Dbg.event(c, "resume, left " + (left / 1000) + "s");
         }
     }
 

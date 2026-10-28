@@ -194,6 +194,14 @@ open_password_screen() {
 
 device_today() { adb shell date +%d%m%Y | tr -d '\r'; }
 
+# Tắt/bật màn hình TV như bấm nút nguồn trên remote (máy ảo: phím SLEEP/WAKEUP, rồi bỏ khóa màn hình)
+screen_off() { adb shell input keyevent 223; }
+screen_on() {
+  adb shell input keyevent 224
+  adb shell wm dismiss-keyguard > /dev/null 2>&1
+  adb shell input keyevent 82
+}
+
 # ======================================================================================================================
 adb wait-for-device
 adb shell 'while [ "$(getprop sys.boot_completed)" != "1" ]; do sleep 1; done' || true
@@ -234,6 +242,13 @@ echo "$ST" | grep -q 'kidApp=true' && pass "Thấy YouTube đã cài" || fail "K
 echo "$ST" | grep -q 'state=RUNNING' && pass "Lần đầu trong ngày: tự cấp phiên xem miễn phí" || fail "Không có phiên xem miễn phí lúc đầu ngày: $ST"
 R=$(rem)
 if [ -n "$R" ] && [ "$R" -ge 1700 ] && [ "$R" -le 1800 ]; then pass "Phiên miễn phí đầu ngày = 30 phút (còn ${R}s)"; else fail "Thời gian phiên đầu ngày lạ: '${R}'"; fi
+echo "$ST" | grep -q 'gateCount=10' && pass "Mặc định: 10 câu toán mỗi lần bật TV" || fail "Số câu toán khi bật TV mặc định lạ: $ST"
+DP=$(adb shell dumpsys package "$PKG" | tr -d '\r')
+if echo "$DP" | grep -q 'android.intent.action.BOOT_COMPLETED' && echo "$DP" | grep -q 'QUICKBOOT_POWERON'; then
+  pass "Ứng dụng đăng ký nhận BOOT_COMPLETED và QUICKBOOT_POWERON (TV khởi động lại / bật nhanh)"
+else
+  fail "Ứng dụng chưa đăng ký nhận sự kiện khởi động"
+fi
 
 # Thời tiết: chờ tối đa 25 giây cho một lần tải
 for _ in $(seq 1 25); do
@@ -412,8 +427,9 @@ if open_password_screen; then
   fi
 fi
 
-section "8. Đến giờ: báo trước, tạm dừng khi tắt màn hình, tự khóa"
+section "8. Đến giờ: báo trước, tạm dừng khi tắt màn hình, tự khóa (tắt tính năng toán khi bật TV)"
 admin PARENT_OFF > /dev/null
+admin CONFIG --ei gate 0 > /dev/null
 guard_ready
 adb logcat -c
 admin GRANT --ei seconds 65 > /dev/null
@@ -448,6 +464,166 @@ klog | grep -E 'alarm|bringToFront|goHome|expire|pause|resume|grant' | tail -25 
 if klog | grep -q 'alarm com.minhminhhungyen.kidstv.alarm.END'; then pass "Báo thức hết giờ đã chạy"; else warn "Báo thức hết giờ không thấy trong nhật ký (khóa do dịch vụ bảo vệ)"; fi
 if klog | grep -q 'bringToFront: timeup'; then pass "Báo thức tự đưa màn hình khóa lên trước (đặc quyền chạy nền hoạt động)"; else warn "Màn hình khóa lên nhờ dịch vụ bảo vệ chứ không phải nhờ báo thức"; fi
 adb logcat -d 2>/dev/null | grep -i 'Background activity start' | grep -i kidstv | head -3 | tee -a "$STEPS" > /dev/null
+
+section "9. Mỗi lần bật TV: giải toán trước (lần bật đầu tiên trong ngày vẫn miễn phí)"
+admin PARENT_OFF > /dev/null
+# Phiên thử dài 2 phút để phân biệt "phiên mới đầy đủ" với "phần giờ còn dư của lần trước"
+admin CONFIG --ei gate 3 --ei session 2 --ei streak 20 --ei bonus 15 --ei free 1 > /dev/null
+admin RESET_DAY > /dev/null
+guard_ready
+adb shell input keyevent 3
+sleep 1
+
+# 9a. Lần bật đầu tiên trong ngày: miễn phí, không hỏi toán
+if wait_field state RUNNING 12 && [ "$(field gate)" = "false" ]; then
+  pass "Đầu ngày mới: bật TV lần đầu được xem miễn phí, không phải làm toán"
+else
+  fail "Đầu ngày mới mà không được xem miễn phí: $(status)"
+fi
+R=$(rem)
+if [ -n "$R" ] && [ "$R" -ge 100 ] && [ "$R" -le 120 ]; then pass "Phiên miễn phí đầu ngày = 2 phút theo cấu hình thử (còn ${R}s)"; else fail "Phiên miễn phí lạ: '${R}'"; fi
+
+# 9b. Tắt TV giữa phiên (chỉ còn 30 giây): khóa luôn, bỏ giờ còn dư
+admin GRANT --ei seconds 30 > /dev/null
+guard_ready
+screen_off
+if wait_field state LOCKED 10 && [ "$(field gate)" = "true" ]; then
+  pass "Tắt TV giữa chừng → khóa luôn, chờ giải toán ở lần bật sau (không giữ lại giờ còn dư)"
+else
+  fail "Tắt TV nhưng không khóa chờ toán: $(status)"
+fi
+sleep 3
+
+# 9c. Bật TV lần 2: hiện toán, chưa cho xem
+screen_on
+if wait_focus "kidstv.MainActivity" 12 && wait_ui prefix "Chào bé" 10; then
+  pass "Bật TV lần thứ 2 → hiện màn hình toán"
+else
+  fail "Bật TV lần thứ 2 mà không thấy màn hình toán: $(status) $(focus_line)"
+fi
+shot gate-screen
+if ui_has contains "3 câu"; then pass "Màn hình nêu đúng số câu cần làm (3, theo cấu hình thử)"; else warn "Không thấy '3 câu' trên màn hình toán khi bật TV"; fi
+adb logcat -c
+adb shell am start -n "$FAKE_ACT" > /dev/null 2>&1
+if wait_focus "kidstv.MainActivity" 10 && klog | grep -q 'khi dang khoa'; then
+  pass "Chưa giải toán mà mở YouTube → bị đẩy lại màn hình toán"
+else
+  fail "Chưa giải toán mà YouTube mở được: $(focus_line)"
+fi
+
+# 9d. Sai thì làm lại từ đầu; đủ 3 câu đúng liên tiếp thì được MỘT PHIÊN MỚI đầy đủ
+wait_ui prefix "Chào bé" 8 || log "  (không thấy lại màn hình toán)"
+solve right
+sleep 0.8
+if wait_field streak "1/3" 6; then pass "Toán khi bật TV: trả lời đúng, chuỗi đúng tăng lên 1/3"; else fail "Chuỗi đúng không tăng: $(field streak)"; fi
+wait_new_question || log "  (không thấy bài mới)"
+solve wrong
+if wait_field streak "0/3" 6; then pass "Toán khi bật TV: trả lời sai, chuỗi đúng về 0/3"; else fail "Sai mà chuỗi không về 0: $(field streak)"; fi
+shot gate-after-wrong
+wait_new_question || log "  (không thấy bài mới)"
+for k in 1 2 3; do
+  solve right || break
+  if [ "$k" -lt 3 ]; then
+    sleep 0.8
+    wait_new_question || log "  (không thấy bài mới)"
+  fi
+done
+if wait_field state RUNNING 10 && [ "$(field gate)" = "false" ]; then pass "Đủ 3 câu đúng liên tiếp → được xem"; else fail "Đủ câu đúng nhưng không được xem: $(status)"; fi
+R=$(rem)
+if [ -n "$R" ] && [ "$R" -ge 90 ] && [ "$R" -le 120 ]; then pass "Được một phiên MỚI đầy đủ 2 phút (còn ${R}s), không phải 30 giây cũ"; else fail "Giờ sau khi giải toán lạ: '${R}'"; fi
+if status | grep -q 'bonusToday=0'; then pass "Toán khi bật TV không bị tính là lượt thưởng"; else warn "Lượt thưởng trong ngày lạ: $(status)"; fi
+if wait_focus "fakekids.FakeKidsActivity" 8; then pass "Giải xong thì tự mở YouTube"; else warn "Giải xong không tự mở YouTube: $(focus_line)"; fi
+shot gate-after-reward
+
+# 9e. Sang ngày mới: lần bật đầu tiên miễn phí dù TV đã tắt (đang chờ toán)
+admin CONFIG --ei freeDay 0 > /dev/null
+guard_ready
+screen_off
+wait_field state LOCKED 10 || log "  (không khóa khi tắt màn hình: $(status))"
+sleep 3
+screen_on
+if wait_field state RUNNING 12 && [ "$(field gate)" = "false" ] && [ "$(field freeDay)" = "$(field today)" ]; then
+  pass "Sáng hôm sau: bật TV lần đầu vẫn được xem miễn phí dù TV đã tắt/bật"
+else
+  fail "Sáng hôm sau bật TV mà không được xem miễn phí: $(status)"
+fi
+
+# 9f. TV khởi động lại (giả lập BOOT_COMPLETED) cũng phải làm toán
+admin GRANT --ei seconds 30 > /dev/null
+guard_ready
+admin BOOT > /dev/null
+if wait_field state LOCKED 8 && [ "$(field gate)" = "true" ]; then pass "TV khởi động lại → khóa chờ giải toán"; else fail "Khởi động lại mà không khóa: $(status)"; fi
+if wait_focus "kidstv.MainActivity" 10 && wait_ui prefix "Chào bé" 10; then pass "Sau khi khởi động lại, màn hình toán hiện lên"; else fail "Sau khởi động lại không thấy màn hình toán: $(focus_line)"; fi
+shot gate-after-boot
+
+# 9g. Tắt TV thì chế độ phụ huynh tự kết thúc
+admin PARENT_ON --ei minutes 30 > /dev/null
+screen_off
+sleep 2
+if [ "$(field parent)" = "false" ] && [ "$(field passThrough)" = "false" ]; then
+  pass "Tắt TV → chế độ phụ huynh kết thúc (bé bật lên không xem tự do được)"
+else
+  fail "Tắt TV nhưng chế độ phụ huynh còn: $(status)"
+fi
+sleep 2
+screen_on
+wait_focus "kidstv.MainActivity" 10 || log "  (màn hình trẻ em không lên: $(focus_line))"
+wait_ui prefix "Chào bé" 8 || log "  (không thấy màn hình toán)"
+
+# 9h. Menu phụ huynh: có dòng chỉnh số câu khi bật TV
+admin CONFIG --ei gate 10 > /dev/null
+if open_password_screen; then
+  adb shell input text "$(device_today)"
+  if wait_ui exact "Menu phụ huynh" 8; then
+    if ui_has prefix "Số câu toán mỗi lần bật TV" && ui_has prefix "Số câu toán khi hết giờ"; then
+      pass "Menu phụ huynh có 2 dòng: số câu toán khi hết giờ và khi bật TV"
+    else
+      fail "Menu phụ huynh thiếu dòng số câu toán"
+    fi
+    shot parent-menu-gate
+    tap_ui prefix "Số câu toán mỗi lần bật TV"
+    if wait_field gateCount 15 6; then pass "Bấm dòng 'Số câu toán mỗi lần bật TV': 10 → 15 câu"; else fail "Dòng số câu toán khi bật TV không đổi được: $(status)"; fi
+    admin CONFIG --ei gate 0 > /dev/null
+    tap_ui prefix "Số câu toán mỗi lần bật TV"
+    if wait_field gateCount 5 6; then pass "Từ Tắt bấm tiếp → 5 câu"; else warn "Vòng lặp tùy chọn số câu lạ: $(status)"; fi
+    shot parent-menu-gate-off
+  else
+    fail "Không vào được Menu phụ huynh để thử dòng số câu toán"
+  fi
+else
+  fail "Không mở được màn hình nhập mật khẩu để thử Menu phụ huynh"
+fi
+
+# 9i. Tắt tính năng (gate 0): tắt/bật TV chỉ tạm dừng, giờ còn dư được giữ
+admin PARENT_OFF > /dev/null
+admin CONFIG --ei gate 0 > /dev/null
+admin GRANT --ei seconds 90 > /dev/null
+guard_ready
+screen_off
+if wait_field state PAUSED 8 && [ "$(field gate)" = "false" ]; then pass "Tắt tính năng toán khi bật TV: tắt TV chỉ tạm dừng giờ như cũ"; else fail "Tắt tính năng nhưng vẫn khóa: $(status)"; fi
+sleep 2
+screen_on
+if wait_field state RUNNING 10; then pass "Tắt tính năng: bật lại TV thì đếm tiếp"; else fail "Bật lại TV mà không đếm tiếp: $(status)"; fi
+
+# 9j. Cập nhật ứng dụng (cài đè) KHÔNG được khóa hay bắt làm toán
+admin CONFIG --ei gate 10 > /dev/null
+admin GRANT --ei seconds 120 > /dev/null
+adb install -r "$APK" > "$OUT/install-again.txt" 2>&1
+cat "$OUT/install-again.txt"
+sleep 8
+wait_field guardRunning true 25 || log "  (dịch vụ bảo vệ chưa chạy lại sau khi cài đè)"
+if [ "$(field state)" = "RUNNING" ] && [ "$(field gate)" = "false" ]; then
+  pass "Cài đè bản mới: phiên đang xem được giữ nguyên, không bị khóa"
+else
+  fail "Cài đè bản mới làm đổi phiên xem: $(status)"
+fi
+admin EVENTS | tr '|' '\n' | tail -25 | tee -a "$STEPS"
+if admin EVENTS | grep -q 'man hinh tat' && admin EVENTS | grep -q 'gate (tat man hinh)'; then
+  pass "Tệp sự kiện ghi lại các lần tắt/bật màn hình và khóa chờ toán (xem lại được sau khi TV khởi động)"
+else
+  fail "Tệp sự kiện thiếu dòng tắt/bật màn hình"
+fi
+admin CONFIG --ei gate 0 > /dev/null
 
 # ---- Tổng kết -------------------------------------------------------------------------------------------------
 sleep 2
