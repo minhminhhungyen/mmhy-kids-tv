@@ -1,7 +1,7 @@
 name: Android CI
 
 # Kids TV MMHY: kiểm thử đơn vị → APK (debug + release, ký bằng khóa cố định trong repo)
-# → chạy thử trên máy ảo màn hình TV 1920x1080 với YouTube Kids GIẢ (chụp ảnh từng bước).
+# → chạy thử trên máy ảo màn hình TV 1920x1080 với YouTube GIẢ (chụp ảnh từng bước).
 # Kết quả (APK, kết quả kiểm thử, ảnh màn hình) được tải lên mục Artifacts của lần chạy
 # và đẩy vào nhánh "ci-artifacts" (chỉ giữ bản mới nhất) để tải nhanh.
 
@@ -47,7 +47,7 @@ jobs:
         continue-on-error: true
         run: ./gradlew --no-daemon --stacktrace :app:testDebugUnitTest 2>&1 | tee ci-out/logs/1-test.txt
 
-      - name: Build APKs (Kids TV debug + release, YouTube Kids giả)
+      - name: Build APKs (Kids TV debug + release, YouTube giả)
         run: ./gradlew --no-daemon --stacktrace :app:assembleDebug :app:assembleRelease :fakekids:assembleDebug 2>&1 | tee ci-out/logs/2-assemble.txt
 
       - name: Inspect APKs

@@ -112,7 +112,8 @@ public class AdminReceiver extends BroadcastReceiver {
         sb.append(" guardRunning=").append(GuardService.instance != null);
         sb.append(" lastPkg=").append(GuardService.lastPkg);
         sb.append(" defaultHome=").append(Kids.weAreDefaultHome(c));
-        sb.append(" ytKids=").append(Kids.installed(c));
+        sb.append(" kidApp=").append(Kids.installed(c));
+        sb.append(" kidPkg=").append(Kids.PKG);
         sb.append(" homeResumed=").append(MainActivity.resumed);
         return sb.toString();
     }

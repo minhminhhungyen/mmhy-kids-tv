@@ -31,7 +31,7 @@ import java.util.Locale;
 import java.util.Random;
 
 /**
- * Màn hình chính của TV ở chế độ trẻ em (HOME): chỉ có một ô YouTube Kids, đồng hồ, thời tiết, lịch âm dương.
+ * Màn hình chính của TV ở chế độ trẻ em (HOME): chỉ có một ô YouTube, đồng hồ, thời tiết, lịch âm dương.
  * Hết giờ → màn hình khóa với bài toán; mật khẩu phụ huynh (mặc định = ngày hôm nay ddMMyyyy) mở Menu phụ huynh.
  */
 public class MainActivity extends Activity {
@@ -459,7 +459,7 @@ public class MainActivity extends Activity {
         int calW = Math.round(240 * S);
         f.addView(right, fl(960 - 36 - calW, 26, calW, Math.round(270 * S)));
 
-        // Ô duy nhất: YouTube Kids
+        // Ô duy nhất: YouTube (hồ sơ của bé do phụ huynh cài trong ứng dụng YouTube)
         LinearLayout t = new LinearLayout(this);
         t.setOrientation(LinearLayout.HORIZONTAL);
         t.setGravity(Gravity.CENTER_VERTICAL);
@@ -470,7 +470,7 @@ public class MainActivity extends Activity {
         t.addView(new PlayBadge(this), new LinearLayout.LayoutParams(Ui.u(66), Ui.u(66)));
         LinearLayout txt = vbox();
         txt.setPadding(Ui.u(14), 0, 0, 0);
-        tvTileTitle = Ui.tv(this, "YouTube Kids", 26, Ui.INK, true);
+        tvTileTitle = Ui.tv(this, "YouTube", 26, Ui.INK, true);
         tvTileSub = Ui.tv(this, "Nhấn OK để xem", 15, Ui.MUTED, false);
         txt.addView(tvTileTitle);
         txt.addView(tvTileSub);
@@ -513,7 +513,7 @@ public class MainActivity extends Activity {
             return;
         }
         if (!Kids.launch(this)) {
-            Home.toast(this, "Chưa có YouTube Kids trên TV này. Nhờ bố mẹ cài đặt nhé.");
+            Home.toast(this, "Chưa có YouTube trên TV này. Nhờ bố mẹ cài đặt nhé.");
         }
     }
 
@@ -533,7 +533,7 @@ public class MainActivity extends Activity {
             refreshWeather();
         }
         boolean installed = Kids.installed(this);
-        setIf(tvTileTitle, installed ? "YouTube Kids" : "Chưa có YouTube Kids");
+        setIf(tvTileTitle, installed ? "YouTube" : "Chưa có YouTube");
         setIf(tvTileSub, installed ? "Nhấn OK để xem" : "Nhờ bố mẹ cài đặt");
         int st = Session.state(this);
         long rem = Session.remainingMs(this);
@@ -1078,7 +1078,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    /** Nút phát đỏ của ô YouTube Kids (vẽ bằng mã, không phụ thuộc phông chữ). */
+    /** Nút phát đỏ của ô YouTube (vẽ bằng mã, không phụ thuộc phông chữ). */
     private static final class PlayBadge extends View {
         private final Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
         private final Path tri = new Path();

@@ -30,6 +30,9 @@ final class MonthView extends View {
     MonthView(Context c) {
         super(c);
         p.setTextAlign(Paint.Align.CENTER);
+        // Đo và vẽ cùng một kiểu (không làm tròn từng chữ), tránh trên TV thật chuỗi vẽ ra rộng hơn số đo.
+        p.setSubpixelText(true);
+        p.setLinearText(true);
     }
 
     /** y, m (1..12); d = ngày hôm nay nếu cùng tháng, ngược lại 0. */
@@ -54,10 +57,17 @@ final class MonthView extends View {
 
     /** Đặt cỡ chữ theo mong muốn, thu nhỏ lại nếu chuỗi rộng hơn maxW để không bị cắt chữ. */
     private void fit(String text, float size, float maxW) {
-        p.setTextSize(size);
+        float s = size;
+        p.setTextSize(s);
         float tw = p.measureText(text);
         if (tw > maxW && tw > 0f) {
-            p.setTextSize(size * maxW / tw);
+            s = size * maxW / tw;
+            p.setTextSize(s);
+        }
+        // Đo lại: nếu phông thật trên TV vẫn rộng hơn thì thu nhỏ thêm cho tới khi vừa.
+        for (int i = 0; i < 6 && p.measureText(text) > maxW; i++) {
+            s *= 0.95f;
+            p.setTextSize(s);
         }
     }
 
@@ -78,12 +88,12 @@ final class MonthView extends View {
         p.setStyle(Paint.Style.FILL);
         p.setTypeface(Typeface.DEFAULT_BOLD);
         p.setColor(Ui.GREEN);
-        fit(title, titleH * 0.78f, w * 0.98f);
+        fit(title, titleH * 0.78f, w * 0.94f);
         cv.drawText(title, w / 2f, titleH * 0.80f, p);
 
         p.setTypeface(Typeface.DEFAULT);
         p.setColor(Ui.ORANGE);
-        fit(sub, subH * 0.80f, w * 0.98f);
+        fit(sub, subH * 0.80f, w * 0.92f);
         cv.drawText(sub, w / 2f, titleH + subH * 0.80f, p);
 
         p.setTypeface(Typeface.DEFAULT_BOLD);

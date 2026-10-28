@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Chạy trên máy ảo trong CI: thử Kids TV MMHY như trên TV thật (màn hình 1920x1080), chụp ảnh từng bước.
-# YouTube Kids trên máy ảo là bản GIẢ (cùng tên gói, màn hình đỏ) vì máy ảo không có YouTube Kids thật.
-# Cách dùng: emulator-checks.sh <APK Kids TV> <APK YouTube Kids giả> <thư mục kết quả>
+# YouTube trên máy ảo là bản GIẢ (cùng tên gói com.google.android.youtube.tv, màn hình đỏ) vì máy ảo không có YouTube thật.
+# Cách dùng: emulator-checks.sh <APK Kids TV> <APK YouTube giả> <thư mục kết quả>
 set -u
 APK="$1"
 FAKE="$2"
@@ -9,7 +9,7 @@ OUT="$3"
 PKG=com.minhminhhungyen.kidstv
 ACT="$PKG/.MainActivity"
 ADMIN="$PKG/.AdminReceiver"
-KIDS=com.google.android.youtube.tvkids
+KIDS=com.google.android.youtube.tv
 FAKE_ACT="$KIDS/com.minhminhhungyen.fakekids.FakeKidsActivity"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 mkdir -p "$OUT/screens" "$OUT/ui"
@@ -214,7 +214,7 @@ cat "$OUT/install-app.txt"
 if grep -q Success "$OUT/install-app.txt"; then pass "Cài Kids TV MMHY"; else fail "Cài Kids TV MMHY: $(cat "$OUT/install-app.txt")"; fi
 adb install -r "$FAKE" > "$OUT/install-fake.txt" 2>&1
 cat "$OUT/install-fake.txt"
-if grep -q Success "$OUT/install-fake.txt"; then pass "Cài YouTube Kids giả"; else fail "Cài YouTube Kids giả: $(cat "$OUT/install-fake.txt")"; fi
+if grep -q Success "$OUT/install-fake.txt"; then pass "Cài YouTube giả"; else fail "Cài YouTube giả: $(cat "$OUT/install-fake.txt")"; fi
 # Đúng các lệnh adb mà bat trên Windows sẽ chạy trên TV thật
 adb shell pm grant "$PKG" android.permission.WRITE_SECURE_SETTINGS > "$OUT/grant.txt" 2>&1 || true
 adb shell appops set "$PKG" SYSTEM_ALERT_WINDOW allow >> "$OUT/grant.txt" 2>&1 || true
@@ -230,7 +230,7 @@ if wait_field guardRunning true 20; then pass "Dịch vụ bảo vệ tự bật
 ST=$(status)
 log "trạng thái: $ST"
 echo "$ST" | grep -q 'defaultHome=true' && pass "Là màn hình chính mặc định" || fail "Chưa là màn hình chính mặc định"
-echo "$ST" | grep -q 'ytKids=true' && pass "Thấy YouTube Kids đã cài" || fail "Không thấy YouTube Kids"
+echo "$ST" | grep -q 'kidApp=true' && pass "Thấy YouTube đã cài" || fail "Không thấy YouTube"
 echo "$ST" | grep -q 'state=RUNNING' && pass "Lần đầu trong ngày: tự cấp phiên xem miễn phí" || fail "Không có phiên xem miễn phí lúc đầu ngày: $ST"
 R=$(rem)
 if [ -n "$R" ] && [ "$R" -ge 1700 ] && [ "$R" -le 1800 ]; then pass "Phiên miễn phí đầu ngày = 30 phút (còn ${R}s)"; else fail "Thời gian phiên đầu ngày lạ: '${R}'"; fi
@@ -246,11 +246,11 @@ sleep 3
 shot home
 if ui_has exact "--°C"; then warn "Ô thời tiết vẫn trống (--°C)"; else pass "Ô thời tiết có số liệu"; fi
 if ui_has prefix "Âm lịch:"; then pass "Có dòng ngày âm lịch"; else fail "Thiếu dòng ngày âm lịch"; fi
-if ui_has exact "YouTube Kids"; then pass "Có ô YouTube Kids"; else fail "Thiếu ô YouTube Kids"; fi
+if ui_has exact "YouTube"; then pass "Có ô YouTube"; else fail "Thiếu ô YouTube"; fi
 # Chữ trên màn hình chính phải đổi ít để uiautomator (và trợ năng của TV) không bị ngập sự kiện
 if ui_has prefix "Còn "; then pass "Có thanh thời gian còn lại"; else fail "Thiếu thanh thời gian còn lại"; fi
 
-section "2. Remote: Back không thoát, OK mở YouTube Kids, Home quay về"
+section "2. Remote: Back không thoát, OK mở YouTube, Home quay về"
 adb shell input keyevent 4
 sleep 1.5
 if focus_line | grep -q 'kidstv.MainActivity'; then pass "Nút Quay lại ở màn hình trẻ em không thoát ra"; else fail "Nút Quay lại làm thoát màn hình trẻ em: $(focus_line)"; fi
@@ -260,10 +260,10 @@ for n in 1 2 3; do
   adb shell input keyevent 23
   if wait_focus "fakekids.FakeKidsActivity" 5; then OPENED=0; break; fi
 done
-if [ $OPENED -eq 0 ]; then pass "OK trên ô YouTube Kids mở được YouTube Kids"; else fail "OK không mở được YouTube Kids"; fi
+if [ $OPENED -eq 0 ]; then pass "OK trên ô YouTube mở được YouTube"; else fail "OK không mở được YouTube"; fi
 shot youtube-kids
 adb shell input keyevent 3
-if wait_focus "kidstv.MainActivity" 10; then pass "Nút Home từ YouTube Kids về màn hình trẻ em"; else fail "Nút Home không về màn hình trẻ em"; fi
+if wait_focus "kidstv.MainActivity" 10; then pass "Nút Home từ YouTube về màn hình trẻ em"; else fail "Nút Home không về màn hình trẻ em"; fi
 
 section "3. Chặn Cài đặt và ứng dụng khác"
 guard_ready
@@ -301,9 +301,9 @@ shot locked
 adb logcat -c
 adb shell am start -n "$FAKE_ACT" > /dev/null 2>&1
 if wait_focus "kidstv.MainActivity" 10 && klog | grep -q 'khi dang khoa'; then
-  pass "Đang khóa mà mở YouTube Kids → bị đẩy về màn hình khóa"
+  pass "Đang khóa mà mở YouTube → bị đẩy về màn hình khóa"
 else
-  fail "YouTube Kids mở được lúc đang khóa: $(focus_line)"
+  fail "YouTube mở được lúc đang khóa: $(focus_line)"
 fi
 
 section "5. Bài toán: đúng liên tiếp mới được xem thêm"
@@ -331,7 +331,7 @@ done
 if wait_field state RUNNING 10; then pass "Đủ 3 câu đúng liên tiếp → được xem tiếp (thưởng 1 phút theo cấu hình thử)"; else fail "Đủ câu đúng nhưng không được xem tiếp: $(status)"; fi
 R=$(rem)
 if [ -n "$R" ] && [ "$R" -ge 1 ] && [ "$R" -le 60 ]; then pass "Thời gian thưởng đúng (còn ${R}s)"; else fail "Thời gian thưởng lạ: '${R}'"; fi
-if wait_focus "fakekids.FakeKidsActivity" 8; then pass "Được thưởng xong thì tự mở YouTube Kids"; else warn "Sau khi thưởng không tự mở YouTube Kids: $(focus_line)"; fi
+if wait_focus "fakekids.FakeKidsActivity" 8; then pass "Được thưởng xong thì tự mở YouTube"; else warn "Sau khi thưởng không tự mở YouTube: $(focus_line)"; fi
 shot after-reward
 if status | grep -q 'bonusToday=1'; then pass "Đếm lượt thưởng trong ngày"; else warn "Số lượt thưởng trong ngày lạ: $(status)"; fi
 admin CONFIG --ei streak 20 --ei bonus 15 > /dev/null
@@ -418,7 +418,7 @@ guard_ready
 adb logcat -c
 admin GRANT --ei seconds 65 > /dev/null
 adb shell am start -n "$FAKE_ACT" > /dev/null 2>&1
-wait_focus "fakekids.FakeKidsActivity" 8 || warn "Không mở được YouTube Kids giả để thử hết giờ"
+wait_focus "fakekids.FakeKidsActivity" 8 || warn "Không mở được YouTube giả để thử hết giờ"
 shot timer-running
 for _ in $(seq 1 14); do
   if klog | grep -q 'alarm com.minhminhhungyen.kidstv.alarm.WARN1'; then break; fi
@@ -437,11 +437,11 @@ if wait_field state RUNNING 10; then pass "Bật lại màn hình → đếm ti�
 AFTER=$(rem)
 log "còn lại trước khi tắt: ${BEFORE}s, sau khi bật lại: ${AFTER}s"
 if [ -n "$BEFORE" ] && [ -n "$AFTER" ] && [ "$AFTER" -ge $((BEFORE - 6)) ]; then pass "Giờ không bị trừ trong lúc tắt màn hình"; else fail "Giờ bị trừ trong lúc tắt màn hình (${BEFORE}s → ${AFTER}s)"; fi
-# Chờ hết giờ thật: màn hình khóa phải tự hiện trên YouTube Kids
+# Chờ hết giờ thật: màn hình khóa phải tự hiện trên YouTube
 adb shell am start -n "$FAKE_ACT" > /dev/null 2>&1
-wait_focus "fakekids.FakeKidsActivity" 8 || warn "Không mở lại được YouTube Kids giả sau khi bật màn hình"
+wait_focus "fakekids.FakeKidsActivity" 8 || warn "Không mở lại được YouTube giả sau khi bật màn hình"
 WAIT=$(( ${AFTER:-60} + 25 ))
-if wait_focus "kidstv.MainActivity" "$WAIT" && wait_field state LOCKED 8; then pass "Hết giờ thật → màn hình khóa tự hiện lên trên YouTube Kids"; else fail "Hết giờ thật nhưng không tự khóa: $(status)"; fi
+if wait_focus "kidstv.MainActivity" "$WAIT" && wait_field state LOCKED 8; then pass "Hết giờ thật → màn hình khóa tự hiện lên trên YouTube"; else fail "Hết giờ thật nhưng không tự khóa: $(status)"; fi
 shot timeup
 if wait_ui prefix "Hết giờ xem rồi" 8; then pass "Màn hình khóa đang hiển thị sau khi hết giờ"; else fail "Không thấy chữ trên màn hình khóa sau khi hết giờ"; fi
 klog | grep -E 'alarm|bringToFront|goHome|expire|pause|resume|grant' | tail -25 | tee -a "$STEPS"

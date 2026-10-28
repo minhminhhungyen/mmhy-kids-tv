@@ -13,12 +13,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/** Ứng dụng YouTube Kids và danh sách gói được phép / bị chặn. */
+/** Ứng dụng của bé (YouTube, chế độ Kids nằm trong hồ sơ của bé) và danh sách gói được phép / bị chặn. */
 final class Kids {
     private Kids() {
     }
 
-    static final String PKG = "com.google.android.youtube.tvkids";
+    /** Ứng dụng YouTube trên Android TV. YouTube Kids nay là hồ sơ của bé nằm trong chính ứng dụng này. */
+    static final String PKG = "com.google.android.youtube.tv";
+    /** Ứng dụng YouTube Kids đời cũ: nay chỉ còn màn hình báo "đã chuyển đi", coi như cùng nhóm với YouTube. */
+    static final String LEGACY_KIDS_PKG = "com.google.android.youtube.tvkids";
     static final String STOCK_HOME_PKG = "com.google.android.apps.tv.launcherx";
 
     /** Cửa sổ hệ thống / dịch vụ luôn được phép (âm lượng, hộp thoại quyền, giọng nói...). */
@@ -52,6 +55,11 @@ final class Kids {
             "com.google.android.packageinstaller"
     ));
 
+    /** Gói này là ứng dụng của bé (được mở khi đang còn giờ, bị chặn khi đã khóa)? */
+    static boolean isKidApp(String pkg) {
+        return PKG.equals(pkg) || LEGACY_KIDS_PKG.equals(pkg);
+    }
+
     static boolean installed(Context c) {
         try {
             ApplicationInfo ai = c.getPackageManager().getApplicationInfo(PKG, 0);
@@ -73,7 +81,7 @@ final class Kids {
     static boolean launch(Context c) {
         Intent i = launchIntent(c);
         if (i == null) {
-            Dbg.d("YouTube Kids chua cai hoac dang tat");
+            Dbg.d("YouTube chua cai hoac dang tat");
             return false;
         }
         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -81,17 +89,18 @@ final class Kids {
             c.startActivity(i);
             return true;
         } catch (Throwable t) {
-            Dbg.d("launch YouTube Kids fail: " + t);
+            Dbg.d("launch YouTube fail: " + t);
             return false;
         }
     }
 
-    /** Tắt hẳn tiến trình YouTube Kids đang chạy nền (âm thanh/video dừng hẳn). */
+    /** Tắt hẳn tiến trình YouTube đang chạy nền (âm thanh/video dừng hẳn). */
     static void kill(Context c) {
         try {
             ActivityManager am = (ActivityManager) c.getSystemService(Context.ACTIVITY_SERVICE);
             if (am != null) {
                 am.killBackgroundProcesses(PKG);
+                am.killBackgroundProcesses(LEGACY_KIDS_PKG);
             }
         } catch (Throwable t) {
             Dbg.d("kill fail: " + t);

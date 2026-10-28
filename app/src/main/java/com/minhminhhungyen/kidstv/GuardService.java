@@ -20,7 +20,7 @@ import java.util.List;
 /**
  * Dịch vụ bảo vệ (trợ năng). Làm 3 việc:
  * 1) Khi một cửa sổ ứng dụng lạ hiện ra (Cài đặt, Live TV, Play Store, màn hình chính gốc...) thì bấm Home để về màn hình trẻ em.
- * 2) Khi đang khóa (hết giờ) mà YouTube Kids hay bất kỳ ứng dụng nào lên trước thì đưa về màn hình khóa.
+ * 2) Khi đang khóa (hết giờ) mà YouTube hay bất kỳ ứng dụng nào lên trước thì đưa về màn hình khóa.
  * 3) Theo dõi màn hình TV bật/tắt để tạm dừng/đếm tiếp giờ xem.
  * Không đọc nội dung màn hình (canRetrieveWindowContent = false).
  */
@@ -140,9 +140,9 @@ public class GuardService extends AccessibilityService {
             return;
         }
         int st = Session.state(this);
-        if (pkg.equals(Kids.PKG)) {
+        if (Kids.isKidApp(pkg)) {
             if (st == Session.LOCKED) {
-                goHome("YouTube Kids khi dang khoa");
+                goHome("YouTube khi dang khoa");
             }
             return;
         }
