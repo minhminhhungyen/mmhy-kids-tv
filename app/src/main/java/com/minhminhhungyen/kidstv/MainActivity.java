@@ -166,32 +166,7 @@ public class MainActivity extends Activity {
             stage.addView(v, new FrameLayout.LayoutParams(MATCH, MATCH));
         }
         setContentView(root);
-        hideBars();
         Dbg.d("onCreate");
-    }
-
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        if (hasFocus) {
-            hideBars();
-        }
-    }
-
-    /** Toàn màn hình, ẩn thanh hệ thống (TV không có, máy ảo kiểm thử thì có) để bố cục luôn đúng 16:9. */
-    @SuppressWarnings("deprecation")
-    private void hideBars() {
-        try {
-            getWindow().getDecorView().setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-        } catch (Throwable ignored) {
-            // không ảnh hưởng chức năng
-        }
     }
 
     @Override
