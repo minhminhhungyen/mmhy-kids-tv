@@ -1,0 +1,15 @@
+# Gradle / Android Studio
+.gradle/
+build/
+/local.properties
+/.idea/
+*.iml
+.DS_Store
+/captures
+.cxx/
+
+# Đầu ra CI tải về máy
+/ci-out/
+
+# Python (script CI)
+__pycache__/

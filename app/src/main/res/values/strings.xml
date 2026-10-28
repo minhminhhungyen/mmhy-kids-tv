@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Kids TV MMHY</string>
+    <string name="guard_label">Kids TV - Bảo vệ trẻ em</string>
+    <string name="guard_desc">Giữ TV ở chế độ trẻ em: chỉ cho mở YouTube Kids trong thời gian được phép và chặn các ứng dụng khác. Tắt dịch vụ này thì TV mất khả năng chặn.</string>
+</resources>
