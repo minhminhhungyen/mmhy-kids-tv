@@ -52,6 +52,15 @@ final class MonthView extends View {
         invalidate();
     }
 
+    /** Đặt cỡ chữ theo mong muốn, thu nhỏ lại nếu chuỗi rộng hơn maxW để không bị cắt chữ. */
+    private void fit(String text, float size, float maxW) {
+        p.setTextSize(size);
+        float tw = p.measureText(text);
+        if (tw > maxW && tw > 0f) {
+            p.setTextSize(size * maxW / tw);
+        }
+    }
+
     @Override
     protected void onDraw(Canvas cv) {
         float w = getWidth();
@@ -69,12 +78,12 @@ final class MonthView extends View {
         p.setStyle(Paint.Style.FILL);
         p.setTypeface(Typeface.DEFAULT_BOLD);
         p.setColor(Ui.GREEN);
-        p.setTextSize(titleH * 0.78f);
+        fit(title, titleH * 0.78f, w * 0.98f);
         cv.drawText(title, w / 2f, titleH * 0.80f, p);
 
         p.setTypeface(Typeface.DEFAULT);
         p.setColor(Ui.ORANGE);
-        p.setTextSize(subH * 0.80f);
+        fit(sub, subH * 0.80f, w * 0.98f);
         cv.drawText(sub, w / 2f, titleH + subH * 0.80f, p);
 
         p.setTypeface(Typeface.DEFAULT_BOLD);

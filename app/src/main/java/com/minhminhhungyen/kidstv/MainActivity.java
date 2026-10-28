@@ -166,7 +166,32 @@ public class MainActivity extends Activity {
             stage.addView(v, new FrameLayout.LayoutParams(MATCH, MATCH));
         }
         setContentView(root);
+        hideBars();
         Dbg.d("onCreate");
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            hideBars();
+        }
+    }
+
+    /** Toàn màn hình, ẩn thanh hệ thống (TV không có, máy ảo kiểm thử thì có) để bố cục luôn đúng 16:9. */
+    @SuppressWarnings("deprecation")
+    private void hideBars() {
+        try {
+            getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        } catch (Throwable ignored) {
+            // không ảnh hưởng chức năng
+        }
     }
 
     @Override
@@ -395,65 +420,69 @@ public class MainActivity extends Activity {
     private View buildHome() {
         FrameLayout f = new FrameLayout(this);
 
-        // Thẻ trái: đồng hồ, ngày dương, ngày âm, thời tiết
+        // Thẻ trái: đồng hồ, ngày dương, ngày âm, thời tiết (thu nhỏ theo hệ số S cho gọn)
+        final float S = 0.85f;
         LinearLayout left = vbox();
         left.setBackground(Ui.cardBg());
-        left.setPadding(Ui.u(16), Ui.u(8), Ui.u(16), Ui.u(8));
-        tvClock = Ui.tv(this, "00:00", 50, Ui.GREEN, true);
+        left.setPadding(Ui.u(16 * S), Ui.u(8 * S), Ui.u(16 * S), Ui.u(8 * S));
+        tvClock = Ui.tv(this, "00:00", 50 * S, Ui.GREEN, true);
         left.addView(tvClock);
-        tvDate = Ui.tv(this, "", 18, Ui.INK, true);
+        tvDate = Ui.tv(this, "", 18 * S, Ui.INK, true);
         left.addView(tvDate);
-        tvLunar = Ui.tv(this, "", 15, Ui.ORANGE, true);
+        tvLunar = Ui.tv(this, "", 15 * S, Ui.ORANGE, true);
         left.addView(tvLunar);
         View div = new View(this);
         div.setBackgroundColor(0x33000000);
         LinearLayout.LayoutParams dlp = new LinearLayout.LayoutParams(MATCH, Math.max(1, Ui.u(1)));
-        dlp.topMargin = Ui.u(6);
-        dlp.bottomMargin = Ui.u(3);
+        dlp.topMargin = Ui.u(6 * S);
+        dlp.bottomMargin = Ui.u(3 * S);
         left.addView(div, dlp);
-        left.addView(Ui.tv(this, "Thời tiết Yên Mỹ, Hưng Yên", 11, Ui.MUTED, false));
+        left.addView(Ui.tv(this, "Thời tiết Yên Mỹ, Hưng Yên", 10, Ui.MUTED, false));
         LinearLayout wx = new LinearLayout(this);
         wx.setOrientation(LinearLayout.HORIZONTAL);
         wx.setGravity(Gravity.CENTER_VERTICAL);
         wxIcon = new WeatherIcon(this);
-        wx.addView(wxIcon, new LinearLayout.LayoutParams(Ui.u(50), Ui.u(50)));
+        wx.addView(wxIcon, new LinearLayout.LayoutParams(Ui.u(50 * S), Ui.u(50 * S)));
         LinearLayout col = vbox();
-        col.setPadding(Ui.u(8), 0, 0, 0);
-        tvWxTemp = Ui.tv(this, "--°C", 30, Ui.INK, true);
-        tvWxDesc = Ui.tv(this, "Đang tải…", 14, Ui.INK, false);
+        col.setPadding(Ui.u(8 * S), 0, 0, 0);
+        tvWxTemp = Ui.tv(this, "--°C", 30 * S, Ui.INK, true);
+        tvWxDesc = Ui.tv(this, "Đang tải…", 14 * S, Ui.INK, false);
         col.addView(tvWxTemp);
         col.addView(tvWxDesc);
         wx.addView(col);
         left.addView(wx);
-        tvWxExtra = Ui.tv(this, "", 12, Ui.MUTED, false);
+        tvWxExtra = Ui.tv(this, "", 10.5f, Ui.MUTED, false);
         left.addView(tvWxExtra);
         LinearLayout fc = new LinearLayout(this);
         fc.setOrientation(LinearLayout.HORIZONTAL);
         LinearLayout.LayoutParams fclp = new LinearLayout.LayoutParams(MATCH, WRAP);
-        fclp.topMargin = Ui.u(4);
+        fclp.topMargin = Ui.u(4 * S);
         for (int i = 0; i < 3; i++) {
             LinearLayout cell = vbox();
             cell.setGravity(Gravity.CENTER_HORIZONTAL);
-            fcName[i] = Ui.tv(this, "", 11, Ui.MUTED, true);
+            fcName[i] = Ui.tv(this, "", 10, Ui.MUTED, true);
             fcName[i].setGravity(Gravity.CENTER);
             fcIcon[i] = new WeatherIcon(this);
-            fcRange[i] = Ui.tv(this, "", 12, Ui.INK, true);
+            fcRange[i] = Ui.tv(this, "", 10.5f, Ui.INK, true);
             fcRange[i].setGravity(Gravity.CENTER);
             cell.addView(fcName[i], new LinearLayout.LayoutParams(MATCH, WRAP));
-            cell.addView(fcIcon[i], new LinearLayout.LayoutParams(Ui.u(28), Ui.u(28)));
+            cell.addView(fcIcon[i], new LinearLayout.LayoutParams(Ui.u(28 * S), Ui.u(28 * S)));
             cell.addView(fcRange[i], new LinearLayout.LayoutParams(MATCH, WRAP));
             fc.addView(cell, new LinearLayout.LayoutParams(0, WRAP, 1f));
         }
         left.addView(fc, fclp);
-        f.addView(left, fl(36, 26, 276, 282));
+        FrameLayout.LayoutParams leftLp = fl(36, 26, Math.round(276 * S), 0);
+        leftLp.height = WRAP; // cao theo nội dung để không cắt dòng dự báo khi phông chữ của TV khác
+        f.addView(left, leftLp);
 
-        // Thẻ phải: lịch âm dương
+        // Thẻ phải: lịch âm dương (cùng hệ số S, sát lề phải)
         FrameLayout right = new FrameLayout(this);
         right.setBackground(Ui.cardBg());
-        right.setPadding(Ui.u(8), Ui.u(6), Ui.u(8), Ui.u(6));
+        right.setPadding(Ui.u(8 * S), Ui.u(6 * S), Ui.u(8 * S), Ui.u(6 * S));
         month = new MonthView(this);
         right.addView(month, new FrameLayout.LayoutParams(MATCH, MATCH));
-        f.addView(right, fl(684, 26, 240, 270));
+        int calW = Math.round(240 * S);
+        f.addView(right, fl(960 - 36 - calW, 26, calW, Math.round(270 * S)));
 
         // Ô duy nhất: YouTube Kids
         LinearLayout t = new LinearLayout(this);
@@ -914,7 +943,7 @@ public class MainActivity extends Activity {
         FrameLayout f = new FrameLayout(this);
         LinearLayout card = vbox();
         card.setBackground(Ui.cardBg());
-        card.setPadding(Ui.u(22), Ui.u(12), Ui.u(22), Ui.u(12));
+        card.setPadding(Ui.u(22), Ui.u(8), Ui.u(22), Ui.u(8));
 
         TextView title = Ui.tv(this, "Menu phụ huynh", 26, Ui.GREEN, true);
         card.addView(title, new LinearLayout.LayoutParams(MATCH, WRAP));
@@ -927,7 +956,7 @@ public class MainActivity extends Activity {
         slp.topMargin = Ui.u(8);
         card.addView(parentScroll, slp);
 
-        f.addView(card, fl(140, 18, 680, 504));
+        f.addView(card, fl(140, 10, 680, 520));
         return f;
     }
 
@@ -1020,8 +1049,8 @@ public class MainActivity extends Activity {
             v.setTextColor(has ? Ui.WHITE : Ui.GREEN);
         });
         r.setOnClickListener(x -> action.run());
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(MATCH, Ui.u(40));
-        lp.bottomMargin = Ui.u(5);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(MATCH, Ui.u(34));
+        lp.bottomMargin = Ui.u(4);
         parentList.addView(r, lp);
     }
 

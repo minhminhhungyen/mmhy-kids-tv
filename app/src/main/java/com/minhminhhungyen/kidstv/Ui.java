@@ -32,7 +32,17 @@ final class Ui {
     private static float scale = 1f;
 
     static void init(Context c) {
-        DisplayMetrics dm = c.getResources().getDisplayMetrics();
+        // Kích thước thật của màn hình (không trừ thanh điều hướng): launcher chạy toàn màn hình, ẩn mọi thanh hệ thống.
+        DisplayMetrics dm = new DisplayMetrics();
+        try {
+            android.view.WindowManager wm = (android.view.WindowManager) c.getSystemService(Context.WINDOW_SERVICE);
+            wm.getDefaultDisplay().getRealMetrics(dm);
+        } catch (Throwable t) {
+            dm = c.getResources().getDisplayMetrics();
+        }
+        if (dm.widthPixels <= 0 || dm.heightPixels <= 0) {
+            dm = c.getResources().getDisplayMetrics();
+        }
         float w = Math.max(dm.widthPixels, dm.heightPixels);
         float h = Math.min(dm.widthPixels, dm.heightPixels);
         scale = Math.min(w / 960f, h / 540f);
