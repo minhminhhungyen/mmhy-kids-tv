@@ -214,8 +214,20 @@ public class MainActivity extends Activity {
         lastInput = System.currentTimeMillis();
     }
 
+    // Phím MENU (một số remote có): không để mở bảng menu rỗng của hệ thống, nó giành mất tiêu điểm của màn hình.
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent e) {
+        if (keyCode == KeyEvent.KEYCODE_MENU) {
+            return true;
+        }
+        return super.onKeyUp(keyCode, e);
+    }
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent e) {
+        if (keyCode == KeyEvent.KEYCODE_MENU) {
+            return true;
+        }
         if (screen == S_PWD) {
             if (keyCode >= KeyEvent.KEYCODE_0 && keyCode <= KeyEvent.KEYCODE_9) {
                 pwdDigit((char) ('0' + keyCode - KeyEvent.KEYCODE_0));

@@ -199,7 +199,15 @@ screen_off() { adb shell input keyevent 223; }
 screen_on() {
   adb shell input keyevent 224
   adb shell wm dismiss-keyguard > /dev/null 2>&1
-  adb shell input keyevent 82
+  sleep 1
+  # Phím MENU chỉ để bỏ màn hình khóa của máy ảo; gửi vào màn hình trẻ em thì nó mở bảng menu rỗng, giành mất tiêu điểm.
+  if focus_line | grep -qi -E 'keyguard|bouncer|NotificationShade'; then adb shell input keyevent 82; fi
+}
+
+# dump_windows <tên>: lưu danh sách cửa sổ (để tìm cửa sổ lạ giành tiêu điểm) vào out/windows-<tên>.txt
+dump_windows() {
+  adb shell dumpsys window windows 2>/dev/null | tr -d '\r' | grep -E 'Window #|mCurrentFocus|mFocusedApp|isOnScreen|AtchDlg' > "$OUT/windows-$1.txt"
+  focus_line >> "$OUT/windows-$1.txt"
 }
 
 # ======================================================================================================================
@@ -553,7 +561,7 @@ admin GRANT --ei seconds 30 > /dev/null
 guard_ready
 admin BOOT > /dev/null
 if wait_field state LOCKED 8 && [ "$(field gate)" = "true" ]; then pass "TV khởi động lại → khóa chờ giải toán"; else fail "Khởi động lại mà không khóa: $(status)"; fi
-if wait_focus "kidstv.MainActivity" 10 && wait_ui prefix "Chào bé" 10; then pass "Sau khi khởi động lại, màn hình toán hiện lên"; else fail "Sau khởi động lại không thấy màn hình toán: $(focus_line)"; fi
+if wait_focus "kidstv.MainActivity" 10 && wait_ui prefix "Chào bé" 10; then pass "Sau khi khởi động lại, màn hình toán hiện lên"; else dump_windows after-boot; fail "Sau khởi động lại không thấy màn hình toán: $(focus_line)"; fi
 shot gate-after-boot
 
 # 9g. Tắt TV thì chế độ phụ huynh tự kết thúc
@@ -591,6 +599,7 @@ if open_password_screen; then
     fail "Không vào được Menu phụ huynh để thử dòng số câu toán"
   fi
 else
+  dump_windows parent-menu
   fail "Không mở được màn hình nhập mật khẩu để thử Menu phụ huynh"
 fi
 

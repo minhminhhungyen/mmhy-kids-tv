@@ -158,8 +158,13 @@ public class GuardService extends AccessibilityService {
 
     /** fromEvent = false: gọi lúc dịch vụ vừa kết nối (đọc trạng thái hiện tại), không phải TV vừa tắt/bật thật. */
     private void onScreen(boolean on, boolean fromEvent) {
-        Dbg.event(this, "man hinh " + (on ? "bat" : "tat") + (fromEvent ? "" : " (luc ket noi dich vu)")
-                + " state=" + Session.state(this) + " gate=" + Prefs.gate(this));
+        String line = "man hinh " + (on ? "bat" : "tat") + (fromEvent ? "" : " (luc ket noi dich vu)")
+                + " state=" + Session.state(this) + " gate=" + Prefs.gate(this);
+        if (fromEvent) {
+            Dbg.event(this, line);
+        } else {
+            Dbg.d(line); // dịch vụ kết nối lại không phải sự kiện tắt/bật TV: không ghi vào tệp sự kiện
+        }
         if (on) {
             Session.resume(this);
             boolean expired = Session.checkExpired(this);

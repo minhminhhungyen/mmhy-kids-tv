@@ -73,7 +73,11 @@ echo [9/9] Xong.
 echo.
 echo XONG BUOC 5. Nhin man hinh TV: phai thay gio, thoi tiet, lich va o YouTube.
 echo.
-echo VIEC CON LAI LAM MOT LAN TREN TV [quan trong, de be khong vao duoc tai khoan nguoi lon]:
+echo CHE DO MOI: lan bat TV dau tien trong ngay duoc xem mien phi. Tu lan bat thu 2 tro di
+echo [tat TV roi bat lai] man hinh hien 10 cau toan, giai xong be duoc mot phien moi day du.
+echo Doi so cau o Menu phu huynh, dong "So cau toan moi lan bat TV" [Tat / 5 / 10 / 15 / 20].
+echo.
+echo VIEC CHI LAM MOT LAN TREN TV [neu chua lam; de be khong vao duoc tai khoan nguoi lon]:
 echo   Bam nut Phu huynh, nhap mat khau, chon Dung TV binh thuong, mo YouTube.
 echo   Chon ho so cua be [Kids]. Vao Cai dat o ben trai, chon Ma phu huynh, dat 4 so.
 echo   Xong bam HOME, vao lai Phu huynh, bam Thoat phu huynh.
