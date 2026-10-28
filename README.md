@@ -26,6 +26,7 @@ Dịch vụ bảo vệ **không đọc nội dung màn hình**, chỉ biết gó
 3. `7-XEM-NHAT-KY.bat`: lấy nhật ký khi cần xem ứng dụng nào đã bị chặn.
 4. `8-THOAT-LAUNCHER-BE.bat`: **thoát/hoàn tác** (tạm dừng hoặc gỡ hẳn), TV về màn hình chính gốc.
 5. `9-DAT-LAI-MAT-KHAU.bat`: đặt lại mật khẩu về mật khẩu theo ngày (quên mật khẩu cố định).
+6. `10-THU-NUT-NGUON.bat`: thử có hướng dẫn trên TV thật: bấm nút Nguồn trên remote để tắt rồi bật TV, bat đọc lại xem TV có gửi sự kiện tắt màn hình, ứng dụng có khóa chờ toán không, và lấy nhật ký nguồn điện (gọi luôn `7-XEM-NHAT-KY.bat`).
 
 Sau khi xong, nhớ **tắt "Gỡ lỗi mạng" (Network debugging) trên TV**: cổng adb 5555 không mã hóa, ai cùng mạng wifi đều vào được.
 
