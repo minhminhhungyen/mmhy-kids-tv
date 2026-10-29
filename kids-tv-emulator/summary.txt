@@ -1,0 +1,10 @@
+pid=5527
+android=12 sdk=31
+    versionCode=1 minSdk=26 targetSdk=30
+    versionName=1.0.0
+Physical size: 1440x3120
+Override size: 1920x1080
+Physical density: 560
+Override density: 320
+trạng thái cuối: state=LOCKED remaining=0s parent=false passThrough=false streak=0/20 gate=false gateCount=0 subject=0 viKind=0 viPics=75/75 viAnimals=10/10 session=2m bonus=15m bonusToday=1/cap0 freeDaily=true freeDay=20261029 today=20261029 customPwd=false guardEnabled=true guardRunning=true lastPkg=com.minhminhhungyen.kidstv defaultHome=true kidApp=true kidPkg=com.google.android.youtube.tv homeResumed=true
+đạt=111 hỏng=0

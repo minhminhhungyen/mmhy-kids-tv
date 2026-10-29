@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.minhminhhungyen.kidstv.ViGameTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-10-29T15:27:38.152Z" hostname="runnervm48cm3" time="0.579">
+  <properties/>
+  <testcase name="randomMixCoversEveryKindWithoutLongRuns" classname="com.minhminhhungyen.kidstv.ViGameTest" time="0.121"/>
+  <testcase name="forcedKindOnlyAffectsVietnamese" classname="com.minhminhhungyen.kidstv.ViGameTest" time="0.003"/>
+  <testcase name="answerPositionIsSpreadOut" classname="com.minhminhhungyen.kidstv.ViGameTest" time="0.077"/>
+  <testcase name="someMissingPicturesAreLeftOut" classname="com.minhminhhungyen.kidstv.ViGameTest" time="0.035"/>
+  <testcase name="syllableRulesFollowSpelling" classname="com.minhminhhungyen.kidstv.ViGameTest" time="0.0"/>
+  <testcase name="everyBankEntryGetsAsked" classname="com.minhminhhungyen.kidstv.ViGameTest" time="0.157"/>
+  <testcase name="wordBankIsClean" classname="com.minhminhhungyen.kidstv.ViGameTest" time="0.002"/>
+  <testcase name="statsReportsWhatTheTvCanDraw" classname="com.minhminhhungyen.kidstv.ViGameTest" time="0.0"/>
+  <testcase name="alphabetHas29DistinctLetters" classname="com.minhminhhungyen.kidstv.ViGameTest" time="0.0"/>
+  <testcase name="withoutAnyPictureOnlyLetterAndSyllableQuestions" classname="com.minhminhhungyen.kidstv.ViGameTest" time="0.04"/>
+  <testcase name="animalBankIsClean" classname="com.minhminhhungyen.kidstv.ViGameTest" time="0.001"/>
+  <testcase name="quizRejectsBrokenInput" classname="com.minhminhhungyen.kidstv.ViGameTest" time="0.0"/>
+  <testcase name="everyKindGivesOneRightAnswerAndNoGiveaway" classname="com.minhminhhungyen.kidstv.ViGameTest" time="0.108"/>
+  <testcase name="subjectDecidesWhichQuestions" classname="com.minhminhhungyen.kidstv.ViGameTest" time="0.018"/>
+  <testcase name="noRecentRepeats" classname="com.minhminhhungyen.kidstv.ViGameTest" time="0.012"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

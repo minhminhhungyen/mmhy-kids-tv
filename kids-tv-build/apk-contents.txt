@@ -1,0 +1,14 @@
+Archive:  ci-out/MMHY-KidsTV-release.apk
+  Length      Date    Time    Name
+---------  ---------- -----   ----
+       57  1981-01-01 01:01   META-INF/com/android/build/gradle/app-metadata.properties
+      120  1981-01-01 01:01   META-INF/version-control-info.textproto
+   103888  1981-01-01 01:01   classes.dex
+   183112  1981-01-01 01:01   assets/bg_company.jpg
+     6932  1981-01-01 01:01   AndroidManifest.xml
+      812  1981-01-01 01:01   res/7y.xml
+      552  1981-01-01 01:01   res/ib.xml
+      848  1981-01-01 01:01   res/r2.xml
+     1472  1981-01-01 01:01   resources.arsc
+---------                     -------
+   297793                     9 files

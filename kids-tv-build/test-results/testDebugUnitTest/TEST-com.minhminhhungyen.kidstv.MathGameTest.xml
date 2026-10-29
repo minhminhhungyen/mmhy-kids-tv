@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.minhminhhungyen.kidstv.MathGameTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-29T15:27:38.018Z" hostname="runnervm48cm3" time="0.123">
+  <properties/>
+  <testcase name="problemsStayWithin100" classname="com.minhminhhungyen.kidstv.MathGameTest" time="0.123"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

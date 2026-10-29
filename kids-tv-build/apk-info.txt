@@ -1,0 +1,136 @@
+################ MMHY-KidsTV-debug.apk
+== Kích thước
+-rw-r--r-- 1 runner runner 253629 Oct 29 15:27 app/build/outputs/apk/debug/MMHY-KidsTV-debug.apk
+== SHA-256
+bae6103dd5f426c23ec5a3133248da76393610229b58e9394f68547af06417f3  app/build/outputs/apk/debug/MMHY-KidsTV-debug.apk
+== Build tools
+37.0.0
+== Badging
+package: name='com.minhminhhungyen.kidstv' versionCode='1' versionName='1.0.0' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'
+minSdkVersion:'26'
+targetSdkVersion:'30'
+uses-permission: name='android.permission.INTERNET'
+uses-permission: name='android.permission.RECEIVE_BOOT_COMPLETED'
+uses-permission: name='android.permission.SCHEDULE_EXACT_ALARM'
+uses-permission: name='android.permission.KILL_BACKGROUND_PROCESSES'
+uses-permission: name='android.permission.SYSTEM_ALERT_WINDOW'
+uses-permission: name='android.permission.QUERY_ALL_PACKAGES'
+uses-permission: name='android.permission.WRITE_SECURE_SETTINGS'
+application-label:'Kids TV MMHY'
+application-icon-160:'res/drawable/ic_launcher.xml'
+application: label='Kids TV MMHY' icon='res/drawable/ic_launcher.xml' banner='res/drawable/banner.xml'
+application-debuggable
+launchable-activity: name='com.minhminhhungyen.kidstv.MainActivity'  label='' icon=''
+leanback-launchable-activity: name='com.minhminhhungyen.kidstv.MainActivity'  label='' icon='' banner=''
+feature-group: label=''
+  uses-feature-not-required: name='android.hardware.touchscreen'
+  uses-feature-not-required: name='android.software.leanback'
+  uses-feature: name='android.hardware.screen.landscape'
+  uses-implied-feature: name='android.hardware.screen.landscape' reason='one or more activities have specified a landscape orientation'
+provides-component:'accessibility'
+provides-component:'launcher'
+main
+other-receivers
+supports-screens: 'small' 'normal' 'large' 'xlarge'
+supports-any-density: 'true'
+locales: '--_--'
+densities: '160'
+== Quyền
+package: com.minhminhhungyen.kidstv
+uses-permission: name='android.permission.INTERNET'
+uses-permission: name='android.permission.RECEIVE_BOOT_COMPLETED'
+uses-permission: name='android.permission.SCHEDULE_EXACT_ALARM'
+uses-permission: name='android.permission.KILL_BACKGROUND_PROCESSES'
+uses-permission: name='android.permission.SYSTEM_ALERT_WINDOW'
+uses-permission: name='android.permission.QUERY_ALL_PACKAGES'
+uses-permission: name='android.permission.WRITE_SECURE_SETTINGS'
+== Chữ ký
+V2 Signer: certificate DN: CN=MMHY Kids TV, O=Minh Minh Hung Yen, C=VN
+V2 Signer: certificate SHA-256 digest: 69ca75324e1f9eee2507dc7286d41eebc922654c164fcf3c04901e5bbad5a3e2
+V2 Signer: certificate SHA-1 digest: 172bc623b530de1a5e5ab7953194c0cb9a6c38ee
+V2 Signer: certificate MD5 digest: 603709d065aefcc64cc0c0df084620c3
+
+################ MMHY-KidsTV-release.apk
+== Kích thước
+-rw-r--r-- 1 runner runner 244335 Oct 29 15:27 app/build/outputs/apk/release/MMHY-KidsTV-release.apk
+== SHA-256
+1acff7a03e931e19a6a6c8f5b087974b091b085f88398adfbd27376a404bee69  app/build/outputs/apk/release/MMHY-KidsTV-release.apk
+== Build tools
+37.0.0
+== Badging
+package: name='com.minhminhhungyen.kidstv' versionCode='1' versionName='1.0.0' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'
+minSdkVersion:'26'
+targetSdkVersion:'30'
+uses-permission: name='android.permission.INTERNET'
+uses-permission: name='android.permission.RECEIVE_BOOT_COMPLETED'
+uses-permission: name='android.permission.SCHEDULE_EXACT_ALARM'
+uses-permission: name='android.permission.KILL_BACKGROUND_PROCESSES'
+uses-permission: name='android.permission.SYSTEM_ALERT_WINDOW'
+uses-permission: name='android.permission.QUERY_ALL_PACKAGES'
+uses-permission: name='android.permission.WRITE_SECURE_SETTINGS'
+application-label:'Kids TV MMHY'
+application-icon-160:'res/r2.xml'
+application: label='Kids TV MMHY' icon='res/r2.xml' banner='res/7y.xml'
+launchable-activity: name='com.minhminhhungyen.kidstv.MainActivity'  label='' icon=''
+leanback-launchable-activity: name='com.minhminhhungyen.kidstv.MainActivity'  label='' icon='' banner=''
+feature-group: label=''
+  uses-feature-not-required: name='android.hardware.touchscreen'
+  uses-feature-not-required: name='android.software.leanback'
+  uses-feature: name='android.hardware.screen.landscape'
+  uses-implied-feature: name='android.hardware.screen.landscape' reason='one or more activities have specified a landscape orientation'
+provides-component:'accessibility'
+provides-component:'launcher'
+main
+other-receivers
+supports-screens: 'small' 'normal' 'large' 'xlarge'
+supports-any-density: 'true'
+locales: '--_--'
+densities: '160'
+== Quyền
+package: com.minhminhhungyen.kidstv
+uses-permission: name='android.permission.INTERNET'
+uses-permission: name='android.permission.RECEIVE_BOOT_COMPLETED'
+uses-permission: name='android.permission.SCHEDULE_EXACT_ALARM'
+uses-permission: name='android.permission.KILL_BACKGROUND_PROCESSES'
+uses-permission: name='android.permission.SYSTEM_ALERT_WINDOW'
+uses-permission: name='android.permission.QUERY_ALL_PACKAGES'
+uses-permission: name='android.permission.WRITE_SECURE_SETTINGS'
+== Chữ ký
+V2 Signer: certificate DN: CN=MMHY Kids TV, O=Minh Minh Hung Yen, C=VN
+V2 Signer: certificate SHA-256 digest: 69ca75324e1f9eee2507dc7286d41eebc922654c164fcf3c04901e5bbad5a3e2
+V2 Signer: certificate SHA-1 digest: 172bc623b530de1a5e5ab7953194c0cb9a6c38ee
+V2 Signer: certificate MD5 digest: 603709d065aefcc64cc0c0df084620c3
+
+################ FakeYTKids-debug.apk
+== Kích thước
+-rw-r--r-- 1 runner runner 7025 Oct 29 15:27 fakekids/build/outputs/apk/debug/FakeYTKids-debug.apk
+== SHA-256
+5a35ad9985555895f9aaff32257665f3988ef2d6d0eba3ef883ad4c58d4e653c  fakekids/build/outputs/apk/debug/FakeYTKids-debug.apk
+== Build tools
+37.0.0
+== Badging
+package: name='com.google.android.youtube.tv' versionCode='1' versionName='0.0-fake' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'
+minSdkVersion:'26'
+targetSdkVersion:'30'
+application: label='FakeYTKids' icon=''
+application-debuggable
+launchable-activity: name='com.minhminhhungyen.fakekids.FakeKidsActivity'  label='' icon=''
+leanback-launchable-activity: name='com.minhminhhungyen.fakekids.FakeKidsActivity'  label='' icon='' banner=''
+feature-group: label=''
+  uses-feature-not-required: name='android.hardware.touchscreen'
+  uses-feature-not-required: name='android.software.leanback'
+  uses-feature: name='android.hardware.screen.landscape'
+  uses-implied-feature: name='android.hardware.screen.landscape' reason='one or more activities have specified a landscape orientation'
+main
+supports-screens: 'small' 'normal' 'large' 'xlarge'
+supports-any-density: 'true'
+locales:
+densities:
+== Quyền
+package: com.google.android.youtube.tv
+== Chữ ký
+V2 Signer: certificate DN: C=US, O=Android, CN=Android Debug
+V2 Signer: certificate SHA-256 digest: 7d956ea09cd354ff3081579113230cd93e94f2a52089007cdde97f9944740b9f
+V2 Signer: certificate SHA-1 digest: af600000b912e409febcf14f4949634bdb1656ad
+V2 Signer: certificate MD5 digest: 75eccf445d3fe71f33adc823e4d84f82
+

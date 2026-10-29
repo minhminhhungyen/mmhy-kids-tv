@@ -1,0 +1,7 @@
+Starting: Intent { cmp=com.minhminhhungyen.kidstv/.MainActivity }
+Status: ok
+LaunchState: COLD
+Activity: com.minhminhhungyen.kidstv/.MainActivity
+TotalTime: 892
+WaitTime: 896
+Complete

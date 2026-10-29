@@ -1,0 +1,141 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac UP-TO-DATE
+> Task :app:mergeDebugShaders
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets
+> Task :app:compressDebugAssets FROM-CACHE
+> Task :app:desugarDebugFileDependencies FROM-CACHE
+> Task :app:dexBuilderDebug
+> Task :app:mergeDebugGlobalSynthetics FROM-CACHE
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :app:checkDebugDuplicateClasses
+> Task :app:mergeDebugJniLibFolders
+> Task :app:mergeExtDexDebug FROM-CACHE
+> Task :app:mergeLibDexDebug FROM-CACHE
+> Task :app:mergeDebugNativeLibs NO-SOURCE
+> Task :app:stripDebugDebugSymbols NO-SOURCE
+> Task :app:validateSigningDebug
+> Task :app:mergeDebugJavaResource
+> Task :app:writeDebugAppMetadata
+> Task :app:writeDebugSigningConfigVersions
+> Task :app:preReleaseBuild UP-TO-DATE
+> Task :app:mergeReleaseJniLibFolders
+> Task :app:mergeReleaseNativeLibs NO-SOURCE
+> Task :app:stripReleaseDebugSymbols NO-SOURCE
+> Task :app:extractReleaseNativeSymbolTables NO-SOURCE
+> Task :app:mergeReleaseNativeDebugMetadata NO-SOURCE
+> Task :app:checkReleaseDuplicateClasses
+> Task :app:javaPreCompileRelease FROM-CACHE
+> Task :app:checkReleaseAarMetadata
+> Task :app:processReleaseNavigationResources FROM-CACHE
+> Task :app:compileReleaseNavigationResources FROM-CACHE
+> Task :app:generateReleaseResValues FROM-CACHE
+> Task :app:mapReleaseSourceSetPaths
+> Task :app:generateReleaseResources FROM-CACHE
+> Task :app:mergeReleaseResources FROM-CACHE
+> Task :app:packageReleaseResources FROM-CACHE
+> Task :app:parseReleaseLocalResources FROM-CACHE
+> Task :app:createReleaseCompatibleScreenManifests
+> Task :app:extractDeepLinksRelease FROM-CACHE
+> Task :app:processReleaseMainManifest FROM-CACHE
+> Task :app:processReleaseManifest FROM-CACHE
+> Task :app:processReleaseManifestForPackage FROM-CACHE
+> Task :app:processReleaseResources FROM-CACHE
+> Task :app:mergeProjectDexDebug
+> Task :app:compileReleaseJavaWithJavac FROM-CACHE
+> Task :app:dexBuilderRelease
+> Task :app:desugarReleaseFileDependencies FROM-CACHE
+> Task :app:packageDebug
+> Task :app:createDebugApkListingFileRedirect
+> Task :app:assembleDebug
+> Task :app:mergeReleaseStartupProfile
+> Task :app:mergeExtDexRelease FROM-CACHE
+> Task :app:mergeReleaseArtProfile
+> Task :app:mergeReleaseGlobalSynthetics FROM-CACHE
+> Task :app:mergeReleaseShaders
+> Task :app:compileReleaseShaders NO-SOURCE
+> Task :app:generateReleaseAssets UP-TO-DATE
+> Task :app:mergeReleaseAssets
+> Task :app:compressReleaseAssets FROM-CACHE
+> Task :app:extractReleaseVersionControlInfo
+> Task :app:processReleaseJavaRes NO-SOURCE
+> Task :app:mergeReleaseJavaResource
+> Task :app:optimizeReleaseResources FROM-CACHE
+> Task :app:mergeDexRelease
+> Task :app:collectReleaseDependencies
+> Task :app:compileReleaseArtProfile
+> Task :app:sdkReleaseDependencyData
+> Task :app:validateSigningRelease
+> Task :app:writeReleaseAppMetadata
+> Task :app:writeReleaseSigningConfigVersions
+> Task :fakekids:preBuild UP-TO-DATE
+> Task :fakekids:preDebugBuild UP-TO-DATE
+> Task :fakekids:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :fakekids:javaPreCompileDebug FROM-CACHE
+> Task :fakekids:checkDebugAarMetadata
+> Task :fakekids:processDebugNavigationResources FROM-CACHE
+> Task :fakekids:compileDebugNavigationResources FROM-CACHE
+> Task :fakekids:generateDebugResValues FROM-CACHE
+> Task :fakekids:mapDebugSourceSetPaths
+> Task :fakekids:generateDebugResources FROM-CACHE
+> Task :fakekids:mergeDebugResources FROM-CACHE
+> Task :fakekids:packageDebugResources FROM-CACHE
+> Task :fakekids:parseDebugLocalResources FROM-CACHE
+> Task :fakekids:createDebugCompatibleScreenManifests
+> Task :app:packageRelease
+> Task :app:createReleaseApkListingFileRedirect
+> Task :app:assembleRelease
+> Task :fakekids:extractDeepLinksDebug FROM-CACHE
+> Task :fakekids:processDebugMainManifest FROM-CACHE
+> Task :fakekids:processDebugManifest FROM-CACHE
+> Task :fakekids:processDebugManifestForPackage FROM-CACHE
+> Task :fakekids:processDebugResources FROM-CACHE
+> Task :fakekids:compileDebugJavaWithJavac FROM-CACHE
+> Task :fakekids:mergeDebugShaders
+> Task :fakekids:compileDebugShaders NO-SOURCE
+> Task :fakekids:generateDebugAssets UP-TO-DATE
+> Task :fakekids:mergeDebugAssets
+> Task :fakekids:compressDebugAssets FROM-CACHE
+> Task :fakekids:desugarDebugFileDependencies FROM-CACHE
+> Task :fakekids:dexBuilderDebug FROM-CACHE
+> Task :fakekids:mergeDebugGlobalSynthetics FROM-CACHE
+> Task :fakekids:processDebugJavaRes NO-SOURCE
+> Task :fakekids:checkDebugDuplicateClasses
+> Task :fakekids:mergeDebugJavaResource
+> Task :fakekids:mergeDebugJniLibFolders
+> Task :fakekids:mergeExtDexDebug FROM-CACHE
+> Task :fakekids:mergeLibDexDebug FROM-CACHE
+> Task :fakekids:mergeProjectDexDebug FROM-CACHE
+> Task :fakekids:mergeDebugNativeLibs NO-SOURCE
+> Task :fakekids:stripDebugDebugSymbols NO-SOURCE
+> Task :fakekids:validateSigningDebug
+> Task :fakekids:writeDebugAppMetadata
+> Task :fakekids:writeDebugSigningConfigVersions
+> Task :fakekids:packageDebug
+> Task :fakekids:createDebugApkListingFileRedirect
+> Task :fakekids:assembleDebug
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1793287661444.json
+
+BUILD SUCCESSFUL in 9s
+108 actionable tasks: 46 executed, 45 from cache, 17 up-to-date

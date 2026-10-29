@@ -1,0 +1,134 @@
+
+== 0. Cài đặt
+ĐẠT    Cài Kids TV MMHY
+ĐẠT    Cài YouTube giả
+
+== 1. Màn hình chính
+ĐẠT    Màn hình chính mở được
+ĐẠT    Dịch vụ bảo vệ tự bật (không cần vào Cài đặt trợ năng)
+ĐẠT    Là màn hình chính mặc định
+ĐẠT    Thấy YouTube đã cài
+ĐẠT    Lần đầu trong ngày: tự cấp phiên xem miễn phí
+ĐẠT    Phiên miễn phí đầu ngày = 30 phút (còn 1799s)
+ĐẠT    Mặc định: 10 câu hỏi mỗi lần bật TV
+ĐẠT    Mặc định: dạng bài Toán + Tiếng Việt xen kẽ
+ĐẠT    Phông chữ vẽ được đủ 75/75 hình trong bài tiếng Việt
+ĐẠT    Ứng dụng đăng ký nhận BOOT_COMPLETED và QUICKBOOT_POWERON (TV khởi động lại / bật nhanh)
+ĐẠT    Tải được thời tiết Open-Meteo và đọc được dữ liệu
+ĐẠT    Ô thời tiết có số liệu
+ĐẠT    Có dòng ngày âm lịch
+ĐẠT    Có ô YouTube
+ĐẠT    Có thanh thời gian còn lại
+
+== 2. Remote: Back không thoát, OK mở YouTube, Home quay về
+ĐẠT    Nút Quay lại ở màn hình trẻ em không thoát ra
+ĐẠT    OK trên ô YouTube mở được YouTube
+ĐẠT    Nút Home từ YouTube về màn hình trẻ em
+
+== 3. Chặn Cài đặt và ứng dụng khác
+LƯU Ý  không bắt được cửa sổ Cài đặt kịp lúc (có thể đã bị chặn rất nhanh)
+ĐẠT    Mở Cài đặt → bị đẩy về màn hình trẻ em
+ĐẠT    Nhật ký ghi đã chặn Cài đặt
+ĐẠT    Ứng dụng lạ (com.android.camera2) bị chặn và đẩy về màn hình trẻ em
+
+== 4. Hết giờ: màn hình khóa
+ĐẠT    Hết giờ → màn hình khóa hiện ra
+ĐẠT    Đang khóa mà mở YouTube → bị đẩy về màn hình khóa
+
+== 5. Bài toán: đúng liên tiếp mới được xem thêm
+ĐẠT    Màn hình khóa nêu đúng số câu cần làm (3, theo cấu hình thử)
+ĐẠT    Trả lời đúng: chuỗi đúng tăng lên 1
+ĐẠT    Có lời báo trả lời chưa đúng kèm đáp án
+ĐẠT    Trả lời sai: chuỗi đúng về 0
+ĐẠT    Đủ 3 câu đúng liên tiếp → được xem tiếp (thưởng 1 phút theo cấu hình thử)
+ĐẠT    Thời gian thưởng đúng (còn 59s)
+ĐẠT    Được thưởng xong thì tự mở YouTube
+ĐẠT    Đếm lượt thưởng trong ngày
+
+== 6. Mật khẩu phụ huynh = ngày hôm nay (ddMMyyyy)
+ĐẠT    Nút Phụ huynh mở màn hình nhập mật khẩu
+ĐẠT    Mật khẩu sai bị từ chối
+ĐẠT    Sai 5 lần thì bị khóa 60 giây
+ĐẠT    Đang bị khóa 60 giây thì mật khẩu đúng cũng chưa nhận
+ĐẠT    Mật khẩu = ngày hôm nay (29102026) mở được Menu phụ huynh
+
+== 7. Menu phụ huynh
+ĐẠT    Đặt được mật khẩu cố định 1234
+ĐẠT    Phụ huynh bấm 'Cho bé xem' → bé xem được ngay
+ĐẠT    Thời lượng đúng 30 phút (còn 1798s)
+ĐẠT    Mật khẩu cố định 1234 mở được Menu phụ huynh (tự nhận khi gõ đủ 4 số)
+ĐẠT    Lệnh đặt lại mật khẩu quay về mật khẩu theo ngày
+ĐẠT    Phụ huynh mở được Cài đặt TV
+ĐẠT    Trong chế độ phụ huynh Cài đặt không bị chặn
+ĐẠT    Hết chế độ phụ huynh → tự về màn hình trẻ em
+ĐẠT    Khóa TV ngay hoạt động
+
+== 8. Đến giờ: báo trước, tạm dừng khi tắt màn hình, tự khóa (tắt tính năng toán khi bật TV)
+ĐẠT    Báo thức nhắc trước 1 phút đã chạy
+ĐẠT    Tắt màn hình TV → tạm dừng đếm giờ
+ĐẠT    Bật lại màn hình → đếm tiếp
+ĐẠT    Giờ không bị trừ trong lúc tắt màn hình
+ĐẠT    Hết giờ thật → màn hình khóa tự hiện lên trên YouTube
+ĐẠT    Màn hình khóa đang hiển thị sau khi hết giờ
+ĐẠT    Báo thức hết giờ đã chạy
+ĐẠT    Báo thức tự đưa màn hình khóa lên trước (đặc quyền chạy nền hoạt động)
+
+== 9. Mỗi lần bật TV: giải toán trước (lần bật đầu tiên trong ngày vẫn miễn phí)
+ĐẠT    Đầu ngày mới: bật TV lần đầu được xem miễn phí, không phải làm toán
+ĐẠT    Phiên miễn phí đầu ngày = 2 phút theo cấu hình thử (còn 118s)
+ĐẠT    Tắt TV giữa chừng → khóa luôn, chờ giải toán ở lần bật sau (không giữ lại giờ còn dư)
+ĐẠT    Bật TV lần thứ 2 → hiện màn hình toán
+ĐẠT    Màn hình nêu đúng số câu cần làm (3, theo cấu hình thử)
+ĐẠT    Chưa giải toán mà mở YouTube → bị đẩy lại màn hình toán
+ĐẠT    Toán khi bật TV: trả lời đúng, chuỗi đúng tăng lên 1/3
+ĐẠT    Toán khi bật TV: trả lời sai, chuỗi đúng về 0/3
+ĐẠT    Đủ 3 câu đúng liên tiếp → được xem
+ĐẠT    Được một phiên MỚI đầy đủ 2 phút (còn 119s), không phải 30 giây cũ
+ĐẠT    Toán khi bật TV không bị tính là lượt thưởng
+ĐẠT    Giải xong thì tự mở YouTube
+ĐẠT    Sáng hôm sau: bật TV lần đầu vẫn được xem miễn phí dù TV đã tắt/bật
+ĐẠT    TV khởi động lại → khóa chờ giải toán
+ĐẠT    Sau khi khởi động lại, màn hình toán hiện lên
+ĐẠT    Tắt TV → chế độ phụ huynh kết thúc (bé bật lên không xem tự do được)
+ĐẠT    Menu phụ huynh có 2 dòng: số câu hỏi khi hết giờ và khi bật TV
+ĐẠT    Bấm dòng 'Số câu hỏi mỗi lần bật TV': 10 → 15 câu
+ĐẠT    Từ Tắt bấm tiếp → 5 câu
+ĐẠT    Tắt tính năng toán khi bật TV: tắt TV chỉ tạm dừng giờ như cũ
+ĐẠT    Tắt tính năng: bật lại TV thì đếm tiếp
+ĐẠT    Cài đè bản mới: phiên đang xem được giữ nguyên, không bị khóa
+ĐẠT    Tệp sự kiện ghi lại các lần tắt/bật màn hình và khóa chờ toán (xem lại được sau khi TV khởi động)
+
+== 10. Bài tiếng Việt cho bé dưới 6 tuổi (chữ cái, hình, tiếng kêu, ghép vần)
+ĐẠT    Khóa TV để thử bài tiếng Việt
+ĐẠT    Ra đúng dạng bài: letter-up
+ĐẠT    Dạng letter-up: màn hình hiện đúng dòng lớn, dòng dẫn và 4 đáp án đúng thứ tự
+ĐẠT    Dạng letter-up: trả lời sai thì chuỗi đúng về 0
+ĐẠT    Dạng letter-up: báo chưa đúng kèm lời giải 'Chữ thường của D là d.'
+ĐẠT    Ra đúng dạng bài: letter-low
+ĐẠT    Dạng letter-low: màn hình hiện đúng dòng lớn, dòng dẫn và 4 đáp án đúng thứ tự
+ĐẠT    Dạng letter-low: trả lời sai thì chuỗi đúng về 0
+ĐẠT    Dạng letter-low: báo chưa đúng kèm lời giải 'Chữ hoa của o là O.'
+ĐẠT    Ra đúng dạng bài: first-letter
+ĐẠT    Dạng first-letter: màn hình hiện đúng dòng lớn, dòng dẫn và 4 đáp án đúng thứ tự
+ĐẠT    Dạng first-letter: trả lời sai thì chuỗi đúng về 0
+ĐẠT    Dạng first-letter: báo chưa đúng kèm lời giải '“mặt trăng” bắt đầu bằng chữ m.'
+ĐẠT    Ra đúng dạng bài: word-picture
+ĐẠT    Dạng word-picture: màn hình hiện đúng dòng lớn, dòng dẫn và 4 đáp án đúng thứ tự
+ĐẠT    Dạng word-picture: trả lời sai thì chuỗi đúng về 0
+ĐẠT    Dạng word-picture: báo chưa đúng kèm lời giải '“bút chì” là hình ✏️.'
+ĐẠT    Ra đúng dạng bài: animal-sound
+ĐẠT    Dạng animal-sound: màn hình hiện đúng dòng lớn, dòng dẫn và 4 đáp án đúng thứ tự
+ĐẠT    Dạng animal-sound: trả lời sai thì chuỗi đúng về 0
+ĐẠT    Dạng animal-sound: báo chưa đúng kèm lời giải '“ò ó o o” là tiếng kêu của gà trống 🐓.'
+ĐẠT    Ra đúng dạng bài: syllable
+ĐẠT    Dạng syllable: màn hình hiện đúng dòng lớn, dòng dẫn và 4 đáp án đúng thứ tự
+ĐẠT    Dạng syllable: trả lời sai thì chuỗi đúng về 0
+ĐẠT    Dạng syllable: báo chưa đúng kèm lời giải 's + e = se.'
+ĐẠT    Xen kẽ: ra cả câu toán lẫn câu tiếng Việt trong 10 câu
+ĐẠT    Xen kẽ: 10 câu đúng liên tiếp = 10/50 (bấm đúng ô cho cả toán và tiếng Việt)
+ĐẠT    Đủ 3 câu tiếng Việt đúng liên tiếp → được xem thêm
+ĐẠT    Thời gian thưởng đúng 1 phút theo cấu hình thử (còn 59s)
+ĐẠT    Menu phụ huynh có dòng 'Dạng bài cho bé'
+ĐẠT    Bấm 'Dạng bài cho bé': Tiếng Việt → Toán + Tiếng Việt xen kẽ
+ĐẠT    Bấm tiếp: → Toán
+ĐẠT    Chọn Toán trong menu → màn hình khóa ra câu toán ngay, không giữ câu của môn cũ

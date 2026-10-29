@@ -1,0 +1,129 @@
+trạng thái: state=RUNNING remaining=1799s parent=false passThrough=false streak=0/20 gate=false gateCount=10 subject=2 viKind=0 viPics=75/75 viAnimals=10/10 session=30m bonus=15m bonusToday=0/cap0 freeDaily=true freeDay=20261029 today=20261029 customPwd=false guardEnabled=true guardRunning=true lastPkg=com.minhminhhungyen.kidstv defaultHome=true kidApp=true kidPkg=com.google.android.youtube.tv homeResumed=true
+10-29 15:29:56.147  2221  2242 I KidsTV  : thoi tiet: da cap nhat
+ảnh: 01-home
+  (chờ cửa sổ 'fakekids.FakeKidsActivity' nhưng đang là:   mCurrentFocus=Window{5840f0b u0 com.minhminhhungyen.kidstv/com.minhminhhungyen.kidstv.MainActivity})
+ảnh: 02-youtube-kids
+  (chờ cửa sổ 'com.android.settings' nhưng đang là:   mCurrentFocus=Window{b3ef52c u0 com.minhminhhungyen.kidstv/com.minhminhhungyen.kidstv.MainActivity})
+ảnh: 03-settings-blocked
+ứng dụng thường để thử chặn: com.android.camera2
+ảnh: 04-locked
+ảnh: 05-math-question
+  bài toán: 71 − 61 = ? (đáp án 10) → bấm right
+ảnh: 06-math-after-right
+  bài toán: 88 − 46 = ? (đáp án 42) → bấm wrong
+ảnh: 07-math-after-wrong
+  bài toán: 84 + 16 = ? (đáp án 100) → bấm right
+  bài toán: 60 − 14 = ? (đáp án 46) → bấm right
+  bài toán: 86 + 10 = ? (đáp án 96) → bấm right
+ảnh: 08-after-reward
+chạm: exact Phụ huynh (519 823)
+ảnh: 09-password
+ảnh: 10-password-wrong
+ảnh: 11-password-lockout
+mật khẩu hôm nay trên máy ảo: 29102026
+ảnh: 12-parent-menu
+chạm: exact Mật khẩu phụ huynh (816 644)
+chạm: exact OK (1141 593)
+chạm: exact OK (1141 593)
+ảnh: 13-parent-menu-custom-password
+chạm: prefix Cho bé xem (912 132)
+chạm: exact Phụ huynh (519 823)
+chạm: prefix Mở Cài đặt (913 772)
+ảnh: 14-parent-settings-open
+chạm: exact Phụ huynh (519 823)
+chạm: exact Khóa TV ngay (959 836)
+ảnh: 15-timer-running
+còn lại trước khi tắt: 58s, sau khi bật lại: 57s
+ảnh: 16-timeup
+10-29 15:32:29.828  2221  2221 I KidsTV  : grant 65s (adb)
+10-29 15:32:29.829  2221  2221 I KidsTV  : admin GRANT -> granted 65s
+10-29 15:32:34.829  2221  2221 I KidsTV  : alarm com.minhminhhungyen.kidstv.alarm.WARN1
+10-29 15:32:37.256  2221  2221 I KidsTV  : pause, left 57s
+10-29 15:32:46.481  2221  2221 I KidsTV  : resume, left 57s
+10-29 15:33:44.049  2221  2221 I KidsTV  : alarm com.minhminhhungyen.kidstv.alarm.END
+10-29 15:33:44.051  2221  2221 I KidsTV  : expire (time-up)
+10-29 15:33:44.057  2221  2221 I KidsTV  : bringToFront: timeup
+ảnh: 17-gate-screen
+  bài toán: 83 − 73 = ? (đáp án 10) → bấm right
+  bài toán: 52 − 20 = ? (đáp án 32) → bấm wrong
+ảnh: 18-gate-after-wrong
+  bài toán: 70 + 24 = ? (đáp án 94) → bấm right
+  bài toán: 26 − 4 = ? (đáp án 22) → bấm right
+  bài toán: 94 + 3 = ? (đáp án 97) → bấm right
+ảnh: 19-gate-after-reward
+ảnh: 20-gate-after-boot
+chạm: exact Phụ huynh (519 823)
+ảnh: 21-parent-menu-gate
+chạm: prefix Số câu hỏi mỗi lần bật TV (919 516)
+chạm: prefix Số câu hỏi mỗi lần bật TV (919 516)
+ảnh: 22-parent-menu-gate-off
+ 10-29 15:33:44 up=277s expire (time-up) 
+ 10-29 15:33:47 up=280s expire (adb-reset-day) 
+ 10-29 15:33:48 up=281s grant 120s (mien phi dau ngay) 
+ 10-29 15:33:49 up=282s grant 30s (adb) 
+ 10-29 15:33:50 up=284s man hinh tat state=1 gate=false 
+ 10-29 15:33:50 up=284s gate (tat man hinh) 
+ 10-29 15:33:53 up=287s man hinh bat state=0 gate=true 
+ 10-29 15:34:27 up=321s grant 120s (giai toan khi bat TV) 
+ 10-29 15:34:29 up=323s man hinh tat state=1 gate=false 
+ 10-29 15:34:29 up=323s gate (tat man hinh) 
+ 10-29 15:34:33 up=326s man hinh bat state=0 gate=true 
+ 10-29 15:34:33 up=326s grant 120s (mien phi dau ngay) 
+ 10-29 15:34:34 up=327s grant 30s (adb) 
+ 10-29 15:34:35 up=328s boot/replaced android.intent.action.BOOT_COMPLETED 
+ 10-29 15:34:35 up=328s gate (khoi dong android.intent.action.BOOT_COMPLETED) 
+ 10-29 15:34:38 up=331s man hinh tat state=0 gate=true 
+ 10-29 15:34:38 up=331s gate (tat man hinh) 
+ 10-29 15:34:42 up=335s man hinh bat state=0 gate=true 
+ 10-29 15:35:03 up=357s grant 90s (adb) 
+ 10-29 15:35:05 up=358s man hinh tat state=1 gate=false 
+ 10-29 15:35:05 up=358s pause, left 88s 
+ 10-29 15:35:07 up=361s man hinh bat state=2 gate=false 
+ 10-29 15:35:07 up=361s resume, left 88s 
+ 10-29 15:35:08 up=362s grant 120s (adb) 
+ 10-29 15:35:09 up=362s boot/replaced android.intent.action.MY_PACKAGE_REPLACED
+  câu #1 (word-picture) → bấm ô 2 (right)
+ảnh: 23-vi-letter-up
+  câu #2 (letter-up) → bấm ô 3 (wrong)
+ảnh: 24-vi-letter-up-sai
+  câu #3 (letter-up) → bấm ô 2 (right)
+ảnh: 25-vi-letter-low
+  câu #4 (letter-low) → bấm ô 1 (wrong)
+ảnh: 26-vi-letter-low-sai
+  câu #5 (letter-low) → bấm ô 1 (right)
+ảnh: 27-vi-first-letter
+  câu #6 (first-letter) → bấm ô 2 (wrong)
+ảnh: 28-vi-first-letter-sai
+  câu #7 (first-letter) → bấm ô 2 (right)
+ảnh: 29-vi-word-picture
+  câu #8 (word-picture) → bấm ô 0 (wrong)
+ảnh: 30-vi-word-picture-sai
+  câu #9 (word-picture) → bấm ô 1 (right)
+ảnh: 31-vi-animal-sound
+  câu #10 (animal-sound) → bấm ô 3 (wrong)
+ảnh: 32-vi-animal-sound-sai
+  câu #11 (animal-sound) → bấm ô 0 (right)
+ảnh: 33-vi-syllable
+  câu #12 (syllable) → bấm ô 2 (wrong)
+ảnh: 34-vi-syllable-sai
+  câu #13 (syllable) → bấm ô 1 (right)
+  câu #14 (math) → bấm ô 3 (right)
+  câu #15 (math) → bấm ô 1 (right)
+  câu #16 (first-letter) → bấm ô 2 (right)
+  câu #17 (math) → bấm ô 2 (right)
+  câu #18 (animal-sound) → bấm ô 2 (right)
+  câu #19 (math) → bấm ô 2 (right)
+  câu #20 (letter-up) → bấm ô 3 (right)
+  câu #21 (math) → bấm ô 3 (right)
+  câu #22 (math) → bấm ô 0 (right)
+  các dạng đã ra khi xen kẽ: syllable math math first-letter math animal-sound math letter-up math math
+  câu #23 (letter-low) → bấm ô 2 (wrong)
+  câu #24 (word-picture) → bấm ô 1 (right)
+  câu #25 (word-picture) → bấm ô 1 (right)
+  câu #26 (animal-sound) → bấm ô 1 (right)
+chạm: exact Phụ huynh (519 823)
+ảnh: 35-parent-menu-subject
+chạm: prefix Dạng bài cho bé (819 580)
+chạm: prefix Dạng bài cho bé (809 580)
+ảnh: 36-parent-menu-subject-math
+chạm: exact Quay lại (959 880)
