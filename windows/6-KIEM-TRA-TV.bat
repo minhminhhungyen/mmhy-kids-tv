@@ -73,20 +73,27 @@ ping -n 8 127.0.0.1 >nul
 call :CHK "kidstv.MainActivity" "Dang khoa: YouTube bi chan" 1
 "%ADB%" -s %S% exec-out screencap -p > "%OUT%\tv-4-sau-khi-chan.png"
 
-echo [7] Gia lap TV vua bat: phai hien toan truoc khi xem ...
+echo [7] Gia lap TV vua bat: phai tra loi cau hoi truoc khi xem ...
 "%ADB%" -s %S% shell am broadcast -n %PKG%/.AdminReceiver -a %PKG%.GRANT --ei minutes 5 > "%OUT%\kt-grant2.txt" 2>&1
 "%ADB%" -s %S% shell am broadcast -n %PKG%/.AdminReceiver -a %PKG%.BOOT > "%OUT%\kt-boot.txt" 2>&1
 ping -n 8 127.0.0.1 >nul
 "%ADB%" -s %S% shell am broadcast -n %PKG%/.AdminReceiver -a %PKG%.STATUS > "%OUT%\kt-trang-thai-bat-tv.txt" 2>&1
 type "%OUT%\kt-trang-thai-bat-tv.txt" >> "%R%"
-call :FIND "%OUT%\kt-trang-thai-bat-tv.txt" "gate=true" "TV vua bat thi khoa cho be giai toan"
-call :CHK "kidstv.MainActivity" "Man hinh toan dang hien" 3
+call :FIND "%OUT%\kt-trang-thai-bat-tv.txt" "gate=true" "TV vua bat thi khoa cho be tra loi cau hoi"
+call :CHK "kidstv.MainActivity" "Man hinh cau hoi dang hien" 3
 "%ADB%" -s %S% exec-out screencap -p > "%OUT%\tv-5-toan-khi-bat-tv.png"
 "%ADB%" -s %S% shell monkey -p %KIDS% -c android.intent.category.LEANBACK_LAUNCHER 1 > "%OUT%\kt-monkey2.txt" 2>&1
 ping -n 8 127.0.0.1 >nul
-call :CHK "kidstv.MainActivity" "Chua giai toan: YouTube bi chan" 1
+call :CHK "kidstv.MainActivity" "Chua tra loi: YouTube bi chan" 1
 
-echo [8] Dua TV ve trang thai dau ngay moi ...
+echo [8] Thu bai tieng Viet cho be duoi 6 tuoi: chup tung dang bai ...
+for %%K in (1 2 3 4 5 6) do call :VIKIND %%K
+"%ADB%" -s %S% shell am broadcast -n %PKG%/.AdminReceiver -a %PKG%.STATUS > "%OUT%\kt-trang-thai-viet.txt" 2>&1
+type "%OUT%\kt-trang-thai-viet.txt" >> "%R%"
+call :FIND "%OUT%\kt-trang-thai-viet.txt" "viPics=" "TV bao so hinh ve duoc trong bai tieng Viet [xem dong viPics, vi du 73/75]"
+"%ADB%" -s %S% shell am broadcast -n %PKG%/.AdminReceiver -a %PKG%.CONFIG --ei subject 2 --ei viKind 0 > "%OUT%\kt-config-lai.txt" 2>&1
+
+echo [9] Dua TV ve trang thai dau ngay moi ...
 "%ADB%" -s %S% shell am broadcast -n %PKG%/.AdminReceiver -a %PKG%.RESET_DAY > "%OUT%\kt-reset-day.txt" 2>&1
 "%ADB%" -s %S% logcat -d -s KidsTV:V > "%OUT%\kt-nhat-ky.txt" 2>&1
 
@@ -125,6 +132,17 @@ echo   HONG: %~2
 echo HONG: %~2 >> "%R%"
 type "%OUT%\focus.txt" >> "%R%"
 set /a FAILS+=1
+goto :eof
+
+:VIKIND
+rem %1 = dang bai tieng Viet 1..6: ep dang bai, gia lap TV vua bat, luu cau hoi va anh man hinh
+"%ADB%" -s %S% shell am broadcast -n %PKG%/.AdminReceiver -a %PKG%.CONFIG --ei subject 1 --ei viKind %1 > "%OUT%\kt-config-%1.txt" 2>&1
+"%ADB%" -s %S% shell am broadcast -n %PKG%/.AdminReceiver -a %PKG%.BOOT > "%OUT%\kt-boot-%1.txt" 2>&1
+ping -n 7 127.0.0.1 >nul
+"%ADB%" -s %S% shell am broadcast -n %PKG%/.AdminReceiver -a %PKG%.ANSWER > "%OUT%\tv-viet-%1.txt" 2>&1
+"%ADB%" -s %S% exec-out screencap -p > "%OUT%\tv-viet-%1.png"
+type "%OUT%\tv-viet-%1.txt" >> "%R%"
+call :CHK "kidstv.MainActivity" "Man hinh bai tieng Viet dang %1 dang hien" 1
 goto :eof
 
 :FIND

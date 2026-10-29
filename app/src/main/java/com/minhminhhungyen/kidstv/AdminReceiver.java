@@ -9,8 +9,11 @@ import android.content.Intent;
  *   am broadcast -n com.minhminhhungyen.kidstv/.AdminReceiver -a com.minhminhhungyen.kidstv.STATUS
  * Lệnh: STATUS, GRANT (--ei minutes N | --ei seconds N), EXPIRE, RESET_DAY (về trạng thái đầu ngày mới), RESET_PWD,
  *       PARENT_ON (--ei minutes N), PARENT_OFF,
- *       CONFIG (--ei session N --ei bonus N --ei streak N --ei cap N --ei free 0|1 --ei gate N --ei freeDay N;
- *               gate 0 = tắt toán khi bật TV; freeDay 0 = coi như hôm nay chưa dùng phiên miễn phí),
+ *       CONFIG (--ei session N --ei bonus N --ei streak N --ei cap N --ei free 0|1 --ei gate N --ei freeDay N
+ *               --ei subject 0|1|2 --ei viKind 0..6;
+ *               gate 0 = tắt câu hỏi khi bật TV; freeDay 0 = coi như hôm nay chưa dùng phiên miễn phí;
+ *               subject: 0 = Toán, 1 = Tiếng Việt (dưới 6 tuổi), 2 = cả hai xen kẽ; viKind: ép dạng bài tiếng Việt để thử),
+ *       ANSWER (câu hỏi đang hiện trên màn hình khóa và đáp án đúng nằm ở ô nào; dùng cho phép thử tự động),
  *       POWERCYCLE (giả lập "TV vừa tắt"), BOOT (giả lập "TV vừa khởi động xong"; adb không gửi được BOOT_COMPLETED thật),
  *       EVENTS (các sự kiện tắt/bật gần nhất, còn nguyên sau khi TV khởi động lại), SHUTDOWN (gỡ dịch vụ bảo vệ).
  */
@@ -85,7 +88,16 @@ public class AdminReceiver extends BroadcastReceiver {
                     // Để thử: 0 = hôm nay bé chưa dùng phiên miễn phí (không đụng tới phiên đang chạy).
                     Prefs.setFreeDay(c, i.getIntExtra("freeDay", 0));
                 }
+                if (i.hasExtra("subject")) {
+                    Prefs.setSubject(c, Math.max(QuizGame.SUBJECT_MATH, Math.min(QuizGame.SUBJECT_MIX, i.getIntExtra("subject", QuizGame.SUBJECT_MIX))));
+                }
+                if (i.hasExtra("viKind")) {
+                    Prefs.setViKind(c, Math.max(0, Math.min(Quiz.KIND_COUNT - 1, i.getIntExtra("viKind", 0))));
+                }
                 out = "config ok";
+                break;
+            case "ANSWER":
+                out = MainActivity.quizInfo();
                 break;
             case "POWERCYCLE":
                 out = Session.powerCycle(c, "adb") ? "gate started" : "gate is off (gateCount=0), nothing done";
@@ -125,6 +137,8 @@ public class AdminReceiver extends BroadcastReceiver {
         boolean gateMode = Prefs.gate(c) && Prefs.gateCount(c) > 0;
         sb.append(" streak=").append(Prefs.streak(c)).append('/').append(gateMode ? Prefs.gateCount(c) : Prefs.streakGoal(c));
         sb.append(" gate=").append(Prefs.gate(c)).append(" gateCount=").append(Prefs.gateCount(c));
+        sb.append(" subject=").append(Prefs.subject(c)).append(" viKind=").append(Prefs.viKind(c));
+        sb.append(' ').append(ViGame.stats(MainActivity::canShowEmoji));
         sb.append(" session=").append(Prefs.sessionMin(c)).append("m bonus=").append(Prefs.bonusMin(c)).append('m');
         sb.append(" bonusToday=").append(Prefs.bonusToday(c)).append("/cap").append(Prefs.bonusCap(c));
         sb.append(" freeDaily=").append(Prefs.freeDaily(c)).append(" freeDay=").append(Prefs.freeDay(c));

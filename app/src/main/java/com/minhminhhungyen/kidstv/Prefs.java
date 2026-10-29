@@ -74,6 +74,28 @@ final class Prefs {
         return sp(c).getBoolean(K_GATE, false);
     }
 
+    /**
+     * Dạng bài trên màn hình khóa: 0 = Toán (cộng trừ trong 100), 1 = Tiếng Việt (bé dưới 6 tuổi),
+     * 2 = cả hai xen kẽ (mặc định: máy tính bỏ túi chỉ giải được nửa số câu).
+     */
+    static int subject(Context c) {
+        int v = sp(c).getInt("subject", QuizGame.SUBJECT_MIX);
+        return v < QuizGame.SUBJECT_MATH || v > QuizGame.SUBJECT_MIX ? QuizGame.SUBJECT_MIX : v;
+    }
+
+    static void setSubject(Context c, int v) {
+        sp(c).edit().putInt("subject", v).commit();
+    }
+
+    /** Chỉ để thử bằng adb: 1..6 ép một dạng bài tiếng Việt, 0 = ngẫu nhiên (bình thường). */
+    static int viKind(Context c) {
+        return sp(c).getInt("viKind", 0);
+    }
+
+    static void setViKind(Context c, int v) {
+        sp(c).edit().putInt("viKind", v).commit();
+    }
+
     /** Mỗi ngày bé được xem phiên đầu tiên mà không cần mật khẩu hay làm toán. */
     static boolean freeDaily(Context c) {
         return sp(c).getBoolean("freeDaily", true);

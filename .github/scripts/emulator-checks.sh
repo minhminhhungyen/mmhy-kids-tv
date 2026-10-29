@@ -181,6 +181,67 @@ wait_new_question() {
   return 1
 }
 
+# ---- Câu hỏi bất kỳ (toán hoặc tiếng Việt): đọc từ lệnh ANSWER, bấm ô đáp án theo vị trí ------------------------
+# Không cần đọc chữ hay hình trên màn hình: ứng dụng nói đáp án đúng ở ô số mấy (0..3 từ trái sang phải).
+# quiz_field <tên>: một trường của lệnh ANSWER (q, kind, correct, answer...)
+quiz_field() { admin ANSWER | tr ' ' '\n' | sed -n "s/^$1=//p" | head -1; }
+
+LAST_SEQ=""
+# solve_quiz right|wrong: bấm đáp án đúng/sai của câu đang hiện; đặt LAST_SEQ
+solve_quiz() {
+  local info seq correct kind idx xy
+  info=$(admin ANSWER)
+  seq=$(echo "$info" | tr ' ' '\n' | sed -n 's/^q=//p' | head -1)
+  correct=$(echo "$info" | tr ' ' '\n' | sed -n 's/^correct=//p' | head -1)
+  kind=$(echo "$info" | tr ' ' '\n' | sed -n 's/^kind=//p' | head -1)
+  if [ -z "$seq" ] || [ -z "$correct" ]; then
+    log "KHÔNG ĐỌC ĐƯỢC câu hỏi: $info"
+    return 1
+  fi
+  if [ "$1" = right ]; then idx=$correct; else idx=$(( (correct + 1) % 4 )); fi
+  dump_ui || return 1
+  if ! xy=$(python3 "$HERE/ui_quiz.py" "$OUT/ui/last.xml" tap "$idx"); then
+    log "KHÔNG THẤY ô đáp án $idx trên màn hình"
+    return 1
+  fi
+  log "  câu #$seq ($kind) → bấm ô $idx ($1)"
+  # shellcheck disable=SC2086
+  adb shell input tap $xy
+  LAST_SEQ="$seq"
+}
+
+# Chờ câu MỚI (số thứ tự khác câu vừa làm) hiện ra
+wait_new_quiz() {
+  local i seq
+  for ((i = 0; i < 20; i++)); do
+    seq=$(quiz_field q)
+    if [ -n "$seq" ] && [ "$seq" != "$LAST_SEQ" ]; then return 0; fi
+    sleep 0.5
+  done
+  return 1
+}
+
+# check_quiz_screen: màn hình đang hiện đúng câu hỏi trong ứng dụng (dòng lớn, dòng dẫn, 4 đáp án đúng thứ tự)
+check_quiz_screen() {
+  local info big hint model shown bad=0
+  info=$(admin ANSWER)
+  big=$(echo "$info" | sed -n 's/.* ;big=\(.*\) ;hint=.*/\1/p')
+  hint=$(echo "$info" | sed -n 's/.* ;hint=\(.*\) ;explain=.*/\1/p')
+  model=$(echo "$info" | sed -n 's/.* options=\([^ ]*\) ;big=.*/\1/p')
+  dump_ui || return 1
+  if ! shown=$(python3 "$HERE/ui_quiz.py" "$OUT/ui/last.xml" info); then
+    log "  không thấy đủ 4 ô đáp án trên màn hình"
+    return 1
+  fi
+  if [ "$shown" != "$model" ]; then log "  đáp án trên màn hình '$shown' khác trong ứng dụng '$model'"; bad=1; fi
+  if ! python3 "$HERE/ui_find.py" "$OUT/ui/last.xml" exact "$big" > /dev/null; then log "  không thấy dòng lớn '$big'"; bad=1; fi
+  if [ -n "$hint" ] && ! python3 "$HERE/ui_find.py" "$OUT/ui/last.xml" exact "$hint" > /dev/null; then
+    log "  không thấy dòng dẫn '$hint'"
+    bad=1
+  fi
+  return $bad
+}
+
 # Mở màn hình khóa ngay (hết giờ giả lập) và chờ nó hiện
 lock_now() {
   admin EXPIRE > /dev/null
@@ -250,7 +311,13 @@ echo "$ST" | grep -q 'kidApp=true' && pass "Thấy YouTube đã cài" || fail "K
 echo "$ST" | grep -q 'state=RUNNING' && pass "Lần đầu trong ngày: tự cấp phiên xem miễn phí" || fail "Không có phiên xem miễn phí lúc đầu ngày: $ST"
 R=$(rem)
 if [ -n "$R" ] && [ "$R" -ge 1700 ] && [ "$R" -le 1800 ]; then pass "Phiên miễn phí đầu ngày = 30 phút (còn ${R}s)"; else fail "Thời gian phiên đầu ngày lạ: '${R}'"; fi
-echo "$ST" | grep -q 'gateCount=10' && pass "Mặc định: 10 câu toán mỗi lần bật TV" || fail "Số câu toán khi bật TV mặc định lạ: $ST"
+echo "$ST" | grep -q 'gateCount=10' && pass "Mặc định: 10 câu hỏi mỗi lần bật TV" || fail "Số câu hỏi khi bật TV mặc định lạ: $ST"
+echo "$ST" | grep -q 'subject=2' && pass "Mặc định: dạng bài Toán + Tiếng Việt xen kẽ" || fail "Dạng bài mặc định lạ: $ST"
+PICS=$(echo "$ST" | sed -n 's/.*viPics=\([0-9]*\)\/\([0-9]*\).*/\1 \2/p')
+read -r PIC_OK PIC_ALL <<< "$PICS"
+if [ -n "${PIC_OK:-}" ] && [ "${PIC_OK:-0}" = "${PIC_ALL:-1}" ]; then pass "Phông chữ vẽ được đủ ${PIC_OK}/${PIC_ALL} hình trong bài tiếng Việt"; else warn "Phông chữ chỉ vẽ được ${PIC_OK:-?}/${PIC_ALL:-?} hình trong bài tiếng Việt (hình nào không vẽ được sẽ bị bỏ khỏi bài)"; fi
+# Các phần thử bài toán bên dưới đọc phép tính trên màn hình: đặt môn Toán. Bài tiếng Việt thử riêng ở phần 10.
+admin CONFIG --ei subject 0 > /dev/null
 DP=$(adb shell dumpsys package "$PKG" | tr -d '\r')
 if echo "$DP" | grep -q 'android.intent.action.BOOT_COMPLETED' && echo "$DP" | grep -q 'QUICKBOOT_POWERON'; then
   pass "Ứng dụng đăng ký nhận BOOT_COMPLETED và QUICKBOOT_POWERON (TV khởi động lại / bật nhanh)"
@@ -583,20 +650,20 @@ admin CONFIG --ei gate 10 > /dev/null
 if open_password_screen; then
   adb shell input text "$(device_today)"
   if wait_ui exact "Menu phụ huynh" 8; then
-    if ui_has prefix "Số câu toán mỗi lần bật TV" && ui_has prefix "Số câu toán khi hết giờ"; then
-      pass "Menu phụ huynh có 2 dòng: số câu toán khi hết giờ và khi bật TV"
+    if ui_has prefix "Số câu hỏi mỗi lần bật TV" && ui_has prefix "Số câu hỏi khi hết giờ"; then
+      pass "Menu phụ huynh có 2 dòng: số câu hỏi khi hết giờ và khi bật TV"
     else
-      fail "Menu phụ huynh thiếu dòng số câu toán"
+      fail "Menu phụ huynh thiếu dòng số câu hỏi"
     fi
     shot parent-menu-gate
-    tap_ui prefix "Số câu toán mỗi lần bật TV"
-    if wait_field gateCount 15 6; then pass "Bấm dòng 'Số câu toán mỗi lần bật TV': 10 → 15 câu"; else fail "Dòng số câu toán khi bật TV không đổi được: $(status)"; fi
+    tap_ui prefix "Số câu hỏi mỗi lần bật TV"
+    if wait_field gateCount 15 6; then pass "Bấm dòng 'Số câu hỏi mỗi lần bật TV': 10 → 15 câu"; else fail "Dòng số câu hỏi khi bật TV không đổi được: $(status)"; fi
     admin CONFIG --ei gate 0 > /dev/null
-    tap_ui prefix "Số câu toán mỗi lần bật TV"
+    tap_ui prefix "Số câu hỏi mỗi lần bật TV"
     if wait_field gateCount 5 6; then pass "Từ Tắt bấm tiếp → 5 câu"; else warn "Vòng lặp tùy chọn số câu lạ: $(status)"; fi
     shot parent-menu-gate-off
   else
-    fail "Không vào được Menu phụ huynh để thử dòng số câu toán"
+    fail "Không vào được Menu phụ huynh để thử dòng số câu hỏi"
   fi
 else
   dump_windows parent-menu
@@ -633,6 +700,106 @@ else
   fail "Tệp sự kiện thiếu dòng tắt/bật màn hình"
 fi
 admin CONFIG --ei gate 0 > /dev/null
+
+section "10. Bài tiếng Việt cho bé dưới 6 tuổi (chữ cái, hình, tiếng kêu, ghép vần)"
+VI_KINDS=(math letter-up letter-low first-letter word-picture animal-sound syllable)
+admin PARENT_OFF > /dev/null
+# free 0: không tự cấp phiên miễn phí đầu ngày; streak 50: trả lời nhiều câu mà không bị thưởng giữa chừng
+admin CONFIG --ei gate 0 --ei free 0 --ei streak 50 --ei bonus 15 --ei subject 1 --ei viKind 0 > /dev/null
+admin RESET_DAY > /dev/null
+guard_ready
+if lock_now; then pass "Khóa TV để thử bài tiếng Việt"; else fail "Không khóa được TV để thử bài tiếng Việt: $(status)"; fi
+wait_new_quiz || true
+
+# 10a. Từng dạng bài: ép dạng (viKind), trả lời đúng một câu rồi câu kế tiếp phải thuộc dạng đó
+for K in 1 2 3 4 5 6; do
+  EXPECT="${VI_KINDS[$K]}"
+  admin CONFIG --ei viKind "$K" > /dev/null
+  if ! solve_quiz right; then fail "Không đọc hoặc bấm được câu hỏi trước khi thử dạng $EXPECT"; break; fi
+  if ! wait_field streak "1/50" 6; then fail "Dạng $EXPECT: trả lời đúng mà chuỗi đúng không lên 1: $(field streak)"; fi
+  if ! wait_new_quiz; then fail "Dạng $EXPECT: không ra câu mới sau khi trả lời đúng"; break; fi
+  sleep 0.6
+  KIND=$(quiz_field kind)
+  if [ "$KIND" = "$EXPECT" ]; then
+    pass "Ra đúng dạng bài: $EXPECT"
+  elif [ "$K" -ge 3 ] && [ "$K" -le 5 ]; then
+    warn "Dạng $EXPECT không ra (ra '$KIND'): máy ảo không vẽ đủ hình? viPics=$(field viPics)"
+  else
+    fail "Ép dạng $EXPECT nhưng ra '$KIND'"
+  fi
+  if check_quiz_screen; then
+    pass "Dạng $KIND: màn hình hiện đúng dòng lớn, dòng dẫn và 4 đáp án đúng thứ tự"
+  else
+    fail "Dạng $KIND: màn hình khác với câu hỏi trong ứng dụng"
+  fi
+  shot "vi-$KIND"
+  EXPLAIN=$(admin ANSWER | sed -n 's/.* ;explain=//p')
+  if ! solve_quiz wrong; then fail "Dạng $KIND: không bấm được đáp án sai"; break; fi
+  sleep 0.4
+  shot "vi-$KIND-sai"
+  if wait_field streak "0/50" 6; then pass "Dạng $KIND: trả lời sai thì chuỗi đúng về 0"; else fail "Dạng $KIND: sai mà chuỗi không về 0: $(field streak)"; fi
+  if ui_has contains "$EXPLAIN"; then pass "Dạng $KIND: báo chưa đúng kèm lời giải '$EXPLAIN'"; else fail "Dạng $KIND: không thấy lời giải '$EXPLAIN' sau khi trả lời sai"; fi
+  wait_new_quiz || log "  (chưa thấy câu mới)"
+done
+
+# 10b. Xen kẽ Toán + Tiếng Việt: có cả hai loại câu, và đáp án đúng bấm được cho cả hai
+admin CONFIG --ei subject 2 --ei viKind 0 > /dev/null
+SEEN=""
+for i in $(seq 1 10); do
+  SEEN="$SEEN $(quiz_field kind)"
+  solve_quiz right || break
+  wait_new_quiz || log "  (chưa thấy câu mới)"
+done
+log "  các dạng đã ra khi xen kẽ:$SEEN"
+if echo "$SEEN" | grep -qw math && echo "$SEEN" | tr ' ' '\n' | grep -v -w math | grep -q .; then
+  pass "Xen kẽ: ra cả câu toán lẫn câu tiếng Việt trong 10 câu"
+else
+  fail "Xen kẽ mà chỉ ra một môn:$SEEN"
+fi
+if wait_field streak "10/50" 6; then pass "Xen kẽ: 10 câu đúng liên tiếp = 10/50 (bấm đúng ô cho cả toán và tiếng Việt)"; else fail "Xen kẽ: chuỗi đúng lạ: $(field streak)"; fi
+
+# 10c. Đủ số câu tiếng Việt đúng liên tiếp thì được xem thêm (đường thưởng giống toán)
+admin CONFIG --ei subject 1 > /dev/null
+solve_quiz wrong || true
+wait_field streak "0/50" 6 || log "  (chuỗi chưa về 0: $(field streak))"
+wait_new_quiz || true
+admin CONFIG --ei streak 3 --ei bonus 1 > /dev/null
+for k in 1 2 3; do
+  solve_quiz right || break
+  if [ "$k" -lt 3 ]; then
+    wait_new_quiz || log "  (chưa thấy câu mới)"
+  fi
+done
+if wait_field state RUNNING 10; then pass "Đủ 3 câu tiếng Việt đúng liên tiếp → được xem thêm"; else fail "Đủ câu tiếng Việt đúng mà không được xem: $(status)"; fi
+R=$(rem)
+if [ -n "$R" ] && [ "$R" -ge 1 ] && [ "$R" -le 60 ]; then pass "Thời gian thưởng đúng 1 phút theo cấu hình thử (còn ${R}s)"; else fail "Thời gian thưởng lạ: '${R}'"; fi
+admin CONFIG --ei streak 50 > /dev/null
+
+# 10d. Menu phụ huynh: dòng "Dạng bài cho bé" đổi Tiếng Việt → xen kẽ → Toán → Tiếng Việt, chọn Toán thì màn khóa ra toán ngay
+lock_now || log "  (không khóa lại được: $(status))"
+if open_password_screen; then
+  adb shell input text "$(device_today)"
+  if wait_ui exact "Menu phụ huynh" 8; then
+    if ui_has prefix "Dạng bài cho bé"; then pass "Menu phụ huynh có dòng 'Dạng bài cho bé'"; else fail "Menu phụ huynh thiếu dòng 'Dạng bài cho bé'"; fi
+    shot parent-menu-subject
+    tap_ui prefix "Dạng bài cho bé"
+    if wait_field subject 2 6; then pass "Bấm 'Dạng bài cho bé': Tiếng Việt → Toán + Tiếng Việt xen kẽ"; else fail "Dòng 'Dạng bài cho bé' không đổi: $(status)"; fi
+    tap_ui prefix "Dạng bài cho bé"
+    if wait_field subject 0 6; then pass "Bấm tiếp: → Toán"; else fail "Vòng lặp dạng bài lạ: $(status)"; fi
+    shot parent-menu-subject-math
+    tap_ui exact "Quay lại"
+    if wait_ui prefix "Hết giờ xem rồi" 8 && wait_new_quiz && [ "$(quiz_field kind)" = "math" ]; then
+      pass "Chọn Toán trong menu → màn hình khóa ra câu toán ngay, không giữ câu của môn cũ"
+    else
+      fail "Chọn Toán trong menu mà màn hình khóa vẫn ra: $(quiz_field kind)"
+    fi
+  else
+    fail "Không vào được Menu phụ huynh để thử dòng 'Dạng bài cho bé'"
+  fi
+else
+  fail "Không mở được màn hình nhập mật khẩu để thử Menu phụ huynh (dạng bài)"
+fi
+admin CONFIG --ei subject 0 --ei viKind 0 --ei streak 20 --ei bonus 15 --ei free 1 > /dev/null
 
 # ---- Tổng kết -------------------------------------------------------------------------------------------------
 sleep 2

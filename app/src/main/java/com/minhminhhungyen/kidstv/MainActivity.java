@@ -15,6 +15,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
@@ -38,6 +39,32 @@ public class MainActivity extends Activity {
     /** Màn hình chính đang hiện trên cùng (GuardService dùng để biết có cần kéo về hay không). */
     static volatile boolean resumed = false;
 
+    /** Câu hỏi đang hiện trên màn hình khóa + số thứ tự (để lệnh adb ANSWER và phép thử tự động đọc được). */
+    private static volatile Quiz current = null;
+    private static volatile int quizSeq = 0;
+
+    private static final Paint EMOJI_PAINT = new Paint();
+
+    /** Phông chữ của TV có vẽ được hình (emoji) này không? Hình nào không vẽ được thì không đưa vào bài. */
+    static boolean canShowEmoji(String emoji) {
+        try {
+            return EMOJI_PAINT.hasGlyph(emoji);
+        } catch (Throwable t) {
+            return false;
+        }
+    }
+
+    /** Một dòng cho lệnh adb ANSWER: câu hỏi đang hiện và đáp án đúng nằm ở ô thứ mấy (đếm từ 0, trái sang phải). */
+    static String quizInfo() {
+        Quiz q = current;
+        if (q == null) {
+            return "none";
+        }
+        return "q=" + quizSeq + " kind=" + q.kindName() + " correct=" + q.correctIndex + " answer=" + q.answer()
+                + " options=" + String.join("|", q.options) + " ;big=" + q.big + " ;hint=" + q.hint
+                + " ;explain=" + q.answerText;
+    }
+
     private static final int MATCH = ViewGroup.LayoutParams.MATCH_PARENT;
     private static final int WRAP = ViewGroup.LayoutParams.WRAP_CONTENT;
 
@@ -55,11 +82,13 @@ public class MainActivity extends Activity {
     private static final int[] STREAK_OPTS = {5, 10, 15, 20, 30};
     private static final int[] CAP_OPTS = {0, 1, 2, 3, 5};
     private static final int[] GATE_OPTS = {0, 5, 10, 15, 20};
+    /** Theo thứ tự QuizGame.SUBJECT_MATH, SUBJECT_VI, SUBJECT_MIX. */
+    private static final String[] SUBJECT_NAMES = {"Toán", "Tiếng Việt (dưới 6 tuổi)", "Toán + Tiếng Việt xen kẽ"};
     private static final String[] DAYS = {"Chủ nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"};
 
     private final Handler ui = new Handler(Looper.getMainLooper());
     private final Random rnd = new Random();
-    private final MathGame game = new MathGame(rnd);
+    private final QuizGame quizzes = new QuizGame(rnd, MainActivity::canShowEmoji);
 
     private int screen = -1;
     private Intent lastHandled = null;
@@ -94,13 +123,16 @@ public class MainActivity extends Activity {
     private TextView tvLockTitle;
     private TextView tvLockSub;
     private TextView tvProgress;
-    private TextView tvQuestion;
+    private TextView tvBig;
+    private TextView tvHint;
     private TextView tvFeedback;
     private TextView btnParentLock;
     private View barFill;
     private View mathBox;
     private final TextView[] opt = new TextView[4];
-    private MathGame.Problem problem;
+    private Quiz problem;
+    /** Môn và dạng bài lúc sinh câu hỏi hiện tại: đổi cài đặt thì sinh câu mới, không giữ câu của môn cũ. */
+    private int problemSig = -1;
     private boolean answering = false;
     private long acceptAfter = 0L;
 
@@ -339,12 +371,12 @@ public class MainActivity extends Activity {
         boolean capped = !gate && Prefs.bonusCap(this) > 0 && Prefs.bonusToday(this) >= Prefs.bonusCap(this);
         int goal = goal();
         int bonus = Prefs.bonusMin(this);
-        tvLockTitle.setText(gate ? "Chào bé! Làm toán rồi mới xem nhé!" : "Hết giờ xem rồi!");
+        tvLockTitle.setText(gate ? gateTitle() : "Hết giờ xem rồi!");
         btnParentLock.setText(parentLabel());
         if (gate) {
-            tvLockSub.setText("Giải toán đúng liên tiếp " + goal + " câu để được xem " + Prefs.sessionMin(this) + " phút");
+            tvLockSub.setText("Trả lời đúng liên tiếp " + goal + " câu để được xem " + Prefs.sessionMin(this) + " phút");
             mathBox.setVisibility(View.VISIBLE);
-            if (problem == null) {
+            if (problem == null || problemSig != quizSig()) {
                 newProblem();
             }
             updateProgress();
@@ -352,9 +384,9 @@ public class MainActivity extends Activity {
             tvLockSub.setText("Hôm nay bé đã hết lượt thưởng rồi. Hẹn bé ngày mai nhé!");
             mathBox.setVisibility(View.GONE);
         } else {
-            tvLockSub.setText("Giải toán đúng liên tiếp " + goal + " câu để được xem thêm " + bonus + " phút");
+            tvLockSub.setText("Trả lời đúng liên tiếp " + goal + " câu để được xem thêm " + bonus + " phút");
             mathBox.setVisibility(View.VISIBLE);
-            if (problem == null) {
+            if (problem == null || problemSig != quizSig()) {
                 newProblem();
             }
             updateProgress();
@@ -367,6 +399,22 @@ public class MainActivity extends Activity {
                 opt[1].requestFocus();
             }
         }
+    }
+
+    /** Lời chào ở màn hình khóa lúc bật TV, theo dạng bài phụ huynh chọn (giữ gọn để vừa một dòng). */
+    private String gateTitle() {
+        switch (Prefs.subject(this)) {
+            case QuizGame.SUBJECT_MATH:
+                return "Chào bé! Làm toán rồi mới xem nhé!";
+            case QuizGame.SUBJECT_VI:
+                return "Chào bé! Học chữ rồi mới xem nhé!";
+            default:
+                return "Chào bé! Trả lời rồi mới xem nhé!";
+        }
+    }
+
+    private int quizSig() {
+        return Prefs.subject(this) * 10 + Prefs.viKind(this);
     }
 
     private void killKids() {
@@ -669,11 +717,20 @@ public class MainActivity extends Activity {
         tlp.topMargin = Ui.u(6);
         box.addView(track, tlp);
 
-        tvQuestion = Ui.tv(this, "", 68, Ui.INK, true);
-        tvQuestion.setGravity(Gravity.CENTER);
+        // Khung câu hỏi cao cố định: dòng lớn (phép tính, chữ cái, hình, chữ...) + dòng nhỏ dẫn câu hỏi
+        LinearLayout qBox = vbox();
+        qBox.setGravity(Gravity.CENTER);
+        qBox.setMinimumHeight(Ui.u(132));
+        tvBig = Ui.tv(this, "", 68, Ui.INK, true);
+        tvBig.setGravity(Gravity.CENTER);
+        qBox.addView(tvBig, new LinearLayout.LayoutParams(MATCH, WRAP));
+        tvHint = Ui.tv(this, "", 26, Ui.MUTED, true);
+        tvHint.setGravity(Gravity.CENTER);
+        tvHint.setVisibility(View.GONE);
+        qBox.addView(tvHint, new LinearLayout.LayoutParams(MATCH, WRAP));
         LinearLayout.LayoutParams qlp = new LinearLayout.LayoutParams(MATCH, WRAP);
-        qlp.topMargin = Ui.u(14);
-        box.addView(tvQuestion, qlp);
+        qlp.topMargin = Ui.u(8);
+        box.addView(qBox, qlp);
 
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
@@ -682,7 +739,7 @@ public class MainActivity extends Activity {
             final int idx = i;
             TextView b = Ui.button(this, "", 36);
             b.setOnClickListener(v -> onOption(idx));
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(Ui.u(150), Ui.u(72));
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(Ui.u(150), Ui.u(80));
             lp.leftMargin = Ui.u(8);
             lp.rightMargin = Ui.u(8);
             row.addView(b, lp);
@@ -693,7 +750,8 @@ public class MainActivity extends Activity {
         box.addView(row, rlp);
 
         tvFeedback = Ui.tv(this, " ", 21, Ui.OK, true);
-        tvFeedback.setGravity(Gravity.CENTER);
+        tvFeedback.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.TOP);
+        tvFeedback.setMinHeight(Ui.u(54));
         LinearLayout.LayoutParams flp = new LinearLayout.LayoutParams(MATCH, WRAP);
         flp.topMargin = Ui.u(10);
         box.addView(tvFeedback, flp);
@@ -709,15 +767,26 @@ public class MainActivity extends Activity {
         blp.gravity = Gravity.START;
         card.addView(btnParentLock, blp);
 
-        f.addView(card, fl(110, 34, 740, 472));
+        f.addView(card, fl(110, 20, 740, 500));
         return f;
     }
 
     private void newProblem() {
-        problem = game.next();
-        tvQuestion.setText(problem.text);
+        problem = quizzes.next(Prefs.subject(this), Prefs.viKind(this));
+        problemSig = quizSig();
+        current = problem;
+        quizSeq++;
+        tvBig.setTextSize(TypedValue.COMPLEX_UNIT_PX, Ui.u(problem.bigSize));
+        tvBig.setText(problem.big);
+        if (problem.hint.isEmpty()) {
+            tvHint.setVisibility(View.GONE);
+        } else {
+            tvHint.setText(problem.hint);
+            tvHint.setVisibility(View.VISIBLE);
+        }
         for (int i = 0; i < 4; i++) {
-            opt[i].setText(String.valueOf(problem.options[i]));
+            opt[i].setTextSize(TypedValue.COMPLEX_UNIT_PX, Ui.u(problem.optSize));
+            opt[i].setText(problem.options[i]);
         }
         tvFeedback.setText(" ");
         answering = false;
@@ -744,7 +813,7 @@ public class MainActivity extends Activity {
         } else {
             Prefs.setStreak(this, 0);
             updateProgress();
-            feedback("Chưa đúng. Đáp án là " + problem.answer + ". Mình làm lại từ đầu nhé!", Ui.RED);
+            feedback("Chưa đúng. " + problem.answerText + " Mình làm lại từ đầu nhé!", Ui.RED);
             ui.postDelayed(this::afterAnswer, 2600L);
         }
     }
@@ -759,7 +828,7 @@ public class MainActivity extends Activity {
     }
 
     private void reward() {
-        // Toán khi bật TV: một phiên mới đầy đủ (không tính là lượt thưởng). Toán khi hết giờ: thưởng thêm.
+        // Trả lời đúng khi bật TV: một phiên mới đầy đủ (không tính là lượt thưởng). Khi hết giờ: thưởng thêm.
         final boolean gate = gateMode();
         final int minutes = gate ? Prefs.sessionMin(this) : Prefs.bonusMin(this);
         feedback(gate ? "Tuyệt vời! Bé được xem " + minutes + " phút!" : "Tuyệt vời! Bé được xem thêm " + minutes + " phút!", Ui.OK);
@@ -986,11 +1055,11 @@ public class MainActivity extends Activity {
             Prefs.setSessionMin(c, next(Prefs.sessionMin(c), SESSION_OPTS));
             buildParentRows(1);
         });
-        addRow("Thưởng khi giải toán đúng", Prefs.bonusMin(c) + " phút", () -> {
+        addRow("Thưởng khi trả lời đúng", Prefs.bonusMin(c) + " phút", () -> {
             Prefs.setBonusMin(c, next(Prefs.bonusMin(c), BONUS_OPTS));
             buildParentRows(2);
         });
-        addRow("Số câu toán khi hết giờ", Prefs.streakGoal(c) + " câu", () -> {
+        addRow("Số câu hỏi khi hết giờ", Prefs.streakGoal(c) + " câu", () -> {
             Prefs.setStreakGoal(c, next(Prefs.streakGoal(c), STREAK_OPTS));
             buildParentRows(3);
         });
@@ -1004,15 +1073,20 @@ public class MainActivity extends Activity {
             buildParentRows(5);
         });
         int gc = Prefs.gateCount(c);
-        addRow("Số câu toán mỗi lần bật TV", gc == 0 ? "Tắt" : gc + " câu", () -> {
+        addRow("Số câu hỏi mỗi lần bật TV", gc == 0 ? "Tắt" : gc + " câu", () -> {
             Prefs.setGateCount(c, next(Prefs.gateCount(c), GATE_OPTS));
             buildParentRows(6);
+        });
+        addRow("Dạng bài cho bé", SUBJECT_NAMES[Prefs.subject(c)], () -> {
+            Prefs.setSubject(c, (Prefs.subject(c) + 1) % SUBJECT_NAMES.length);
+            problem = null;
+            buildParentRows(7);
         });
         addRow("Mật khẩu phụ huynh", PasswordPolicy.hasCustom(c) ? "Cố định" : "Theo ngày (ddMMyyyy)", () -> showPwd(M_NEW));
         if (PasswordPolicy.hasCustom(c)) {
             addRow("Dùng lại mật khẩu theo ngày", "", () -> {
                 PasswordPolicy.clearCustom(c);
-                buildParentRows(7);
+                buildParentRows(8);
             });
         }
         addRow("Mở Cài đặt TV", "30 phút", () -> {

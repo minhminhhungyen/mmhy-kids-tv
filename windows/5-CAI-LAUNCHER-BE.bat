@@ -74,8 +74,10 @@ echo.
 echo XONG BUOC 5. Nhin man hinh TV: phai thay gio, thoi tiet, lich va o YouTube.
 echo.
 echo CHE DO MOI: lan bat TV dau tien trong ngay duoc xem mien phi. Tu lan bat thu 2 tro di
-echo [tat TV roi bat lai] man hinh hien 10 cau toan, giai xong be duoc mot phien moi day du.
-echo Doi so cau o Menu phu huynh, dong "So cau toan moi lan bat TV" [Tat / 5 / 10 / 15 / 20].
+echo [tat TV roi bat lai] man hinh hien 10 cau hoi, tra loi xong be duoc mot phien moi day du.
+echo Doi so cau o Menu phu huynh, dong "So cau hoi moi lan bat TV" [Tat / 5 / 10 / 15 / 20].
+echo BAI TIENG VIET cho be duoi 6 tuoi: Menu phu huynh, dong "Dang bai cho be"
+echo [Toan / Tieng Viet / Toan + Tieng Viet xen ke]. Mac dinh la xen ke.
 echo.
 echo VIEC CHI LAM MOT LAN TREN TV [neu chua lam; de be khong vao duoc tai khoan nguoi lon]:
 echo   Bam nut Phu huynh, nhap mat khau, chon Dung TV binh thuong, mo YouTube.
